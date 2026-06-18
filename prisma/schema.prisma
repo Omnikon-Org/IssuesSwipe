@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id                  String           @id @default(uuid())
+  email               String?          @unique
+  username            String           @unique
+  name                String?
+  avatarUrl           String?
+  bio                 String?
+  followersCount      Int              @default(0)
+  publicReposCount    Int              @default(0)
+  githubId            String?          @unique
+  onboardingCompleted Boolean          @default(false)
+  languages           String           @default("[]") // JSON string of languages array
+  experienceLevel     String           @default("Beginner") // "Beginner", "Intermediate", "Advanced"
+  interests           String           @default("[]") // JSON string of interests array
+  xp                  Int              @default(0)
+  streak              Int              @default(0)
+  rank                String           @default("New Contributor")
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  swipes              Swipe[]
+  savedIssues         SavedIssue[]
+  xpTransactions      XPTransaction[]
+  contributions       Contribution[]
+}
+
+model Repository {
+  id          String   @id @default(uuid())
+  githubId    String   @unique
+  name        String
+  owner       String
+  description String?
+  url         String
+  stars       Int      @default(0)
+  language    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  issues      Issue[]
+}
+
+model Issue {
+  id             String       @id @default(uuid())
+  githubId       String       @unique
+  title          String
+  description    String?
+  url            String
+  number         Int
+  state          String       @default("open")
+  repositoryId   String
+  repository     Repository   @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  labels         String       @default("[]") // JSON string of labels
+  difficulty     String       @default("Intermediate") // "Beginner", "Intermediate", "Advanced"
+  estimatedTime  String       @default("2-4 hours")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  swipes         Swipe[]
+  savedIssues    SavedIssue[]
+  contributions  Contribution[]
+}
+
+model Swipe {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  direction String   // "SKIP" or "CONTRIBUTE"
+  createdAt DateTime @default(now())
+
+  @@unique([userId, issueId])
+}
+
+model SavedIssue {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, issueId])
+}
+
+model XPTransaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  action    String   // "SAVE_ISSUE", "OPEN_ISSUE", "SUBMIT_PR", "MERGE_PR"
+  createdAt DateTime @default(now())
+}
+
+model Contribution {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  status    String   // "OPENED", "SUBMITTED", "MERGED"
+  prUrl     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, issueId])
+}
+
+model Rank {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  minXP       Int
+  maxXP       Int
+  description String
+}
