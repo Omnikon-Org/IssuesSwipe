@@ -41,7 +41,7 @@ export async function GET() {
       },
     });
 
-    const popularTechnologies = reposGroupByLanguage.map((g) => ({
+    const popularTechnologies = reposGroupByLanguage.map((g: any) => ({
       language: g.language || 'Unknown',
       count: g._count.id,
     }));
@@ -80,9 +80,9 @@ export async function GET() {
       select: { xp: true, rank: true, experienceLevel: true },
     });
 
-    const xpAverage = users.reduce((acc, curr) => acc + curr.xp, 0) / (users.length || 1);
+    const xpAverage = users.reduce((acc: number, curr: any) => acc + curr.xp, 0) / (users.length || 1);
 
-    const userRanks = users.reduce((acc: Record<string, number>, curr) => {
+    const userRanks = users.reduce((acc: Record<string, number>, curr: any) => {
       acc[curr.rank] = (acc[curr.rank] || 0) + 1;
       return acc;
     }, {});
