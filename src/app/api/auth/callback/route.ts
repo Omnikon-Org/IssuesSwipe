@@ -12,6 +12,46 @@ export async function GET(request: Request) {
   }
 
   try {
+    if (process.env.NEXT_PUBLIC_DEV_MODE === 'true' || code === 'mock_code') {
+      let user = await db.user.findUnique({
+        where: { githubId: 'mock-user-id' },
+      });
+
+      if (!user) {
+        user = await db.user.create({
+          data: {
+            githubId: 'mock-user-id',
+            username: 'johanliebert',
+            avatar: 'https://avatars.githubusercontent.com/u/1024025?v=4',
+            bio: 'Building annoying things and open sourcing them.',
+            preferredLanguages: JSON.stringify(['TypeScript', 'PostgreSQL', 'React']),
+            preferredTopics: JSON.stringify(['Frontend', 'Fullstack']),
+            experienceLevel: 'intermediate',
+            xp: 450,
+            rank: 'Issue Hunter',
+            dailyStreak: 3,
+          },
+        });
+      }
+
+      const jwt = await signToken({ userId: user.id, username: user.username });
+      const cookieStore = await cookies();
+      cookieStore.set('session', jwt, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      const isNew = user.preferredLanguages === '[]' || user.preferredLanguages === '';
+      if (isNew) {
+        return NextResponse.redirect(new URL('/onboarding', request.url));
+      } else {
+        return NextResponse.redirect(new URL('/swipe', request.url));
+      }
+    }
+
     // 1. Exchange code for access token
     const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',

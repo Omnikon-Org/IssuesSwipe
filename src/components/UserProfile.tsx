@@ -34,17 +34,19 @@ interface UserProfileData {
   id: string;
   username: string;
   name: string | null;
-  avatarUrl: string | null;
+  avatar: string | null;
   bio: string | null;
   followersCount: number;
   publicReposCount: number;
   xp: number;
-  streak: number;
+  dailyStreak: number;
   rank: string;
   preferredLanguages: string; // JSON string array
   preferredTopics: string; // JSON string array
   experienceLevel: string;
   savedMatches: any[];
+  swipes: any[];
+  xpTransactions: XPTransaction[];
 }
 
 const RANKS = [
@@ -159,9 +161,9 @@ export default function UserProfile() {
       
       {/* Profile Card Header */}
       <div className="bg-dark-card rounded-3xl p-6 md:p-8 border border-dark-border flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 shadow-sm">
-        {profile.avatarUrl ? (
+        {profile.avatar ? (
           <img
-            src={profile.avatarUrl}
+            src={profile.avatar}
             alt={profile.username}
             className="h-20 w-20 rounded-full border-2 border-brand-purple/40 shadow-sm"
           />

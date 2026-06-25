@@ -9,9 +9,9 @@ interface UserSession {
   id: string;
   username: string;
   name: string | null;
-  avatarUrl: string | null;
+  avatar: string | null;
   xp: number;
-  streak: number;
+  dailyStreak: number;
   rank: string;
 }
 
@@ -122,15 +122,15 @@ export default function Navbar() {
                 {/* Streak */}
                 <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold animate-pulse-slow">
                   <Flame className="h-3.5 w-3.5 fill-current" />
-                  <span>{session.streak}d Streak</span>
+                  <span>{session.dailyStreak}d Streak</span>
                 </div>
 
                 {/* Profile Widget */}
                 <div className="flex items-center space-x-3 pl-3 border-l border-dark-border">
                   <Link href="/profile" className="flex items-center space-x-2.5 group">
-                    {session.avatarUrl ? (
+                    {session.avatar ? (
                       <img
-                        src={session.avatarUrl}
+                        src={session.avatar}
                         alt={session.username}
                         className="h-8 w-8 rounded-full border border-dark-border group-hover:border-brand-blue/40 transition-colors"
                       />
@@ -171,7 +171,7 @@ export default function Navbar() {
             {session && (
               <div className="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 text-[10px] font-semibold">
                 <Flame className="h-3 w-3 fill-orange-400" />
-                <span>{session.streak}d</span>
+                <span>{session.dailyStreak}d</span>
               </div>
             )}
             <button
@@ -212,8 +212,8 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center space-x-2.5"
             >
-              {session.avatarUrl ? (
-                <img src={session.avatarUrl} alt={session.username} className="h-8 w-8 rounded-full" />
+              {session.avatar ? (
+                <img src={session.avatar} alt={session.username} className="h-8 w-8 rounded-full" />
               ) : (
                 <div className="h-8 w-8 rounded-full bg-dark-border flex items-center justify-center text-xs font-bold">
                   {session.username[0]?.toUpperCase()}

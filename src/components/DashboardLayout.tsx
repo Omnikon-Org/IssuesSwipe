@@ -246,7 +246,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Flame className="h-3.5 w-3.5 text-orange-500 fill-orange-500" />
                       <span>Streak</span>
                     </div>
-                    <span className="text-xs font-black text-text-primary">{user.streak || 12} days</span>
+                    <span className="text-xs font-black text-text-primary">{user.dailyStreak} days</span>
                   </div>
                 </div>
               </div>
@@ -359,9 +359,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                     className="flex items-center space-x-2 p-1 rounded-full hover:bg-bg-pill transition-all cursor-pointer"
                   >
-                    {user.avatarUrl ? (
+                    {user.avatar ? (
                       <img
-                        src={user.avatarUrl}
+                        src={user.avatar}
                         alt={user.username}
                         className="h-8 w-8 rounded-full border border-dark-border"
                       />
@@ -430,9 +430,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
 
             <div className="flex items-start space-x-3">
-              {user.avatarUrl ? (
+              {user.avatar ? (
                 <img
-                  src={user.avatarUrl}
+                  src={user.avatar}
                   alt={user.username}
                   className="h-12 w-12 rounded-full border border-dark-border"
                 />
