@@ -15,6 +15,7 @@ interface UserSession {
   xp: number;
   dailyStreak: number;
   rank: string;
+  isAdmin?: boolean;
 }
 
 export default function Navbar() {
@@ -59,7 +60,7 @@ export default function Navbar() {
     { name: 'Swipe Feed', href: '/swipe', icon: Sparkles },
     { name: 'Saved Matches', href: '/matches', icon: GitBranch },
     { name: 'Profile', href: '/profile', icon: UserIcon },
-    { name: 'Admin', href: '/admin', icon: ShieldAlert },
+    ...(session?.isAdmin ? [{ name: 'Admin', href: '/admin', icon: ShieldAlert }] : []),
   ];
 
   if (loading) {

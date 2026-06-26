@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAdminAuth } from '@/lib/firebase/server';
-import { getSessionUser } from '@/lib/auth';
+import { getSessionUser, getAdminStatus } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { cookies } from 'next/headers';
 
@@ -8,7 +8,8 @@ export async function GET() {
   try {
     const user = await getSessionUser();
     if (user) {
-      return NextResponse.json({ authenticated: true, user });
+      const isAdmin = await getAdminStatus();
+      return NextResponse.json({ authenticated: true, user: { ...user, isAdmin } });
     }
     return NextResponse.json({ authenticated: false, user: null });
   } catch (error) {

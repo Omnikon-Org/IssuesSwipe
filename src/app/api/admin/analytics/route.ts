@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/auth';
+import { getSessionUser, getAdminStatus } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const user = await getSessionUser();
-  if (!user) {
+  const isAdmin = await getAdminStatus();
+  if (!user || !isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // We should verify if user is admin. Since we are running in Developer mode
-  // and need to let the USER review the dashboard, we will allow access.
   try {
     const totalUsers = await db.user.count();
     const totalIssues = await db.issue.count();

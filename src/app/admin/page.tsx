@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation';
-import { getSessionUser } from '@/lib/auth';
+import { getSessionUser, getAdminStatus } from '@/lib/auth';
 import AdminDashboard from '@/components/AdminDashboard';
 import DashboardLayout from '@/components/DashboardLayout';
 
 export default async function AdminPage() {
   const user = await getSessionUser();
+  const isAdmin = await getAdminStatus();
 
-  if (!user) {
+  if (!user || !isAdmin) {
     redirect('/');
   }
 

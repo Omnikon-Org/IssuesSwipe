@@ -22,3 +22,19 @@ export async function getSessionUser() {
     return null;
   }
 }
+
+export async function getAdminStatus() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('firebaseSession')?.value;
+
+  if (!sessionCookie) {
+    return false;
+  }
+
+  try {
+    const decodedClaims = await getAdminAuth().verifySessionCookie(sessionCookie, true);
+    return decodedClaims.email === 'pranavthawait@gmail.com';
+  } catch (error) {
+    return false;
+  }
+}
