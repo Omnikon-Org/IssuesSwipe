@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { addXp } from '@/lib/xp';
+import { checkUserPRStatus } from '@/lib/github';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +40,29 @@ export async function GET(request: Request) {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    // Auto-check GitHub for PR status on active matches (up to 5 to prevent rate limits)
+    const activeMatches = savedMatches.filter((m: any) => m.status !== 'pr_merged').slice(0, 5);
+    
+    for (const match of activeMatches) {
+      const prStatus = await checkUserPRStatus(user.username, match.issue.repository.fullName, user.githubToken || undefined);
+      
+      if (prStatus && prStatus.status !== match.status) {
+        // Status advanced!
+        await db.savedMatch.update({
+          where: { id: match.id },
+          data: { status: prStatus.status }
+        });
+        
+        if (prStatus.status === 'pr_opened' && match.status === 'bookmarked') {
+           await addXp(user.id, 'SUBMIT_PR');
+        } else if (prStatus.status === 'pr_merged') {
+           await addXp(user.id, 'MERGE_PR');
+        }
+        
+        match.status = prStatus.status; // update in-memory for response
+      }
+    }
 
     // Clean up structure for response
     const formattedMatches = savedMatches.map((match: any) => {

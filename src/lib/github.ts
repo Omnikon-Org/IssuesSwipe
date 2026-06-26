@@ -6,6 +6,7 @@ export interface GitHubIssueSyncResult {
   success: boolean;
   issuesSynced: number;
   message: string;
+  isSimulated?: boolean;
 }
 
 interface GitHubSearchNode {
@@ -328,5 +329,36 @@ async function simulateSync(note?: string): Promise<GitHubIssueSyncResult> {
     success: true,
     issuesSynced: syncCount,
     message: `Simulation Success. Synced ${syncCount} new issues. ${note || ''}`,
+    isSimulated: true,
   };
+}
+
+export async function checkUserPRStatus(username: string, repoFullName: string, token?: string) {
+  const query = `is:pr author:${username} repo:${repoFullName}`;
+  const headers: HeadersInit = { 'Accept': 'application/vnd.github.v3+json' };
+  
+  if (token && token !== 'mock_client_secret' && token !== 'your_token') {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  try {
+    const res = await fetch(`https://api.github.com/search/issues?q=${encodeURIComponent(query)}`, { headers });
+    if (!res.ok) return null;
+    
+    const data = await res.json();
+    if (data.items && data.items.length > 0) {
+      // Sort by updated_at desc (if multiple)
+      const pr = data.items[0];
+      
+      if (pr.state === 'closed' && pr.pull_request?.merged_at) {
+        return { status: 'pr_merged', url: pr.html_url };
+      }
+      if (pr.state === 'open') {
+        return { status: 'pr_opened', url: pr.html_url };
+      }
+    }
+  } catch(e) {
+    console.error('Failed to check PR status for', username, repoFullName, e);
+  }
+  return null;
 }

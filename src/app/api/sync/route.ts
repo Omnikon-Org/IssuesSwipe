@@ -19,7 +19,7 @@ export async function POST() {
     const result = await syncIssuesFromGitHub(dbUser.githubToken || undefined, languages, topics);
     
     // Add notification on successful sync
-    if (result.success && result.issuesSynced > 0) {
+    if (result.success && result.issuesSynced > 0 && !result.isSimulated) {
       await db.notification.create({
         data: {
           userId: user.id,
