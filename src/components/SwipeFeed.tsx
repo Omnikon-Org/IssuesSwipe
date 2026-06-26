@@ -348,7 +348,7 @@ export default function SwipeFeed() {
           <div className="relative">
             <button
               onClick={() => { setScoreDropdownOpen(!scoreDropdownOpen); setLangDropdownOpen(false); setDiffDropdownOpen(false); }}
-              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-text-primary flex items-center space-x-1 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer"
             >
               <span>Match Score: {minMatchScore === 'All' ? 'All' : `>${minMatchScore}%`}</span>
               <ChevronDown className="h-3.5 w-3.5 opacity-60" />
@@ -359,7 +359,7 @@ export default function SwipeFeed() {
                   <button
                     key={score}
                     onClick={() => { setMinMatchScore(score); setScoreDropdownOpen(false); }}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-text-primary"
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-brand-purple"
                   >
                     {score === 'All' ? 'All Scores' : `>${score}% Match`}
                   </button>
@@ -372,7 +372,7 @@ export default function SwipeFeed() {
           <div className="relative">
             <button
               onClick={() => { setLangDropdownOpen(!langDropdownOpen); setScoreDropdownOpen(false); setDiffDropdownOpen(false); }}
-              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-text-primary flex items-center space-x-1 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer"
             >
               <span>Language: {selectedLanguage}</span>
               <ChevronDown className="h-3.5 w-3.5 opacity-60" />
@@ -383,7 +383,7 @@ export default function SwipeFeed() {
                   <button
                     key={lang}
                     onClick={() => { setSelectedLanguage(lang); setLangDropdownOpen(false); }}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-text-primary"
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-brand-purple"
                   >
                     {lang}
                   </button>
@@ -396,7 +396,7 @@ export default function SwipeFeed() {
           <div className="relative">
             <button
               onClick={() => { setDiffDropdownOpen(!diffDropdownOpen); setLangDropdownOpen(false); setScoreDropdownOpen(false); }}
-              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-text-primary flex items-center space-x-1 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer"
             >
               <span>Difficulty: {selectedDifficulty}</span>
               <ChevronDown className="h-3.5 w-3.5 opacity-60" />
@@ -407,7 +407,7 @@ export default function SwipeFeed() {
                   <button
                     key={diff}
                     onClick={() => { setSelectedDifficulty(diff); setDiffDropdownOpen(false); }}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-text-primary"
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-brand-purple"
                   >
                     {diff}
                   </button>
@@ -419,7 +419,7 @@ export default function SwipeFeed() {
           {/* Good First Issue Switch Toggle */}
           <button
             onClick={() => setGoodFirstIssueOnly(!goodFirstIssueOnly)}
-            className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-text-primary flex items-center space-x-2 cursor-pointer transition-all"
+            className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-2 cursor-pointer transition-all"
           >
             <span>Good First Issue</span>
             <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors cursor-pointer ${goodFirstIssueOnly ? 'bg-brand-purple' : 'bg-bg-pill'}`}>
@@ -521,7 +521,7 @@ export default function SwipeFeed() {
                     <Sparkles className="h-3 w-3 fill-current" />
                     <span>{activeCard.matchScore}% Match</span>
                   </span>
-                  <button className="p-1 rounded-lg text-text-tertiary hover:text-text-primary transition-all">
+                  <button className="p-1 rounded-lg text-text-tertiary hover:text-brand-purple transition-all">
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
                 </div>

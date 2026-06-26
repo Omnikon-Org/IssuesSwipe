@@ -4,7 +4,7 @@ export async function GET(request: Request) {
   const { origin } = new URL(request.url);
   const response = NextResponse.redirect(new URL('/', origin));
   
-  response.cookies.set('session', '', {
+  response.cookies.set('firebaseSession', '', {
     httpOnly: true,
     expires: new Date(0),
     path: '/',
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 }
 export async function POST() {
   const response = NextResponse.json({ success: true });
-  response.cookies.set('session', '', {
+  response.cookies.set('firebaseSession', '', {
     httpOnly: true,
     expires: new Date(0),
     path: '/',

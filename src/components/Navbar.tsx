@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import GitHubAuthButton from './GitHubAuthButton';
 import { usePathname, useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase/client';
 import { Flame, GitBranch, LogOut, User as UserIcon, ShieldAlert, Sparkles, Menu, X } from 'lucide-react';
 
 interface UserSession {
@@ -44,6 +45,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
+      await auth.signOut();
       await fetch('/api/auth/logout', { method: 'POST' });
       setSession(null);
       router.push('/');

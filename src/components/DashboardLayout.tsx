@@ -4,6 +4,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import Link from 'next/link';
 import GitHubAuthButton from './GitHubAuthButton';
 import { usePathname, useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase/client';
 import { 
   Compass, Heart, FileText, Bookmark, GitBranch, User as UserIcon, Settings, 
   Plus, Target, Flame, GitMerge, Database, Sun, Moon, ChevronDown, Bell, Search,
@@ -93,6 +94,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleLogout = async () => {
     try {
+      await auth.signOut();
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/');
       router.refresh();
@@ -170,7 +172,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all ${
                     isActive
                       ? 'bg-bg-highlight text-brand-purple'
-                      : 'text-text-secondary hover:bg-bg-pill hover:text-text-primary'
+                      : 'text-text-secondary hover:bg-bg-pill hover:text-brand-purple'
                   }`}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? 'stroke-[2.5px]' : ''}`} />
@@ -256,7 +258,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="relative pt-3 border-t border-dark-border">
           <button
             onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-            className="flex items-center justify-between w-full px-3 py-2 rounded-xl bg-bg-pill text-text-secondary hover:text-text-primary text-xs font-bold border border-dark-border/60 cursor-pointer transition-all"
+            className="flex items-center justify-between w-full px-3 py-2 rounded-xl bg-bg-pill text-text-secondary hover:text-brand-purple text-xs font-bold border border-dark-border/60 cursor-pointer transition-all"
           >
             <div className="flex items-center space-x-2">
               {theme === 'light' ? <Sun className="h-4 w-4 text-orange-500" /> : <Moon className="h-4 w-4 text-brand-purple" />}
@@ -269,14 +271,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="absolute bottom-12 left-0 right-0 bg-dark-card border border-dark-border rounded-xl shadow-lg p-1.5 space-y-1 z-50">
               <button
                 onClick={() => handleThemeChange('light')}
-                className="flex items-center space-x-2 w-full px-2.5 py-2 rounded-lg hover:bg-bg-pill text-xs font-bold text-text-secondary hover:text-text-primary text-left"
+                className="flex items-center space-x-2 w-full px-2.5 py-2 rounded-lg hover:bg-bg-pill text-xs font-bold text-text-secondary hover:text-brand-purple text-left"
               >
                 <Sun className="h-4 w-4 text-orange-500" />
                 <span>Light</span>
               </button>
               <button
                 onClick={() => handleThemeChange('dark')}
-                className="flex items-center space-x-2 w-full px-2.5 py-2 rounded-lg hover:bg-bg-pill text-xs font-bold text-text-secondary hover:text-text-primary text-left"
+                className="flex items-center space-x-2 w-full px-2.5 py-2 rounded-lg hover:bg-bg-pill text-xs font-bold text-text-secondary hover:text-brand-purple text-left"
               >
                 <Moon className="h-4 w-4 text-brand-purple" />
                 <span>Dark</span>
@@ -316,7 +318,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div className="relative">
                   <button 
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-bg-pill transition-all cursor-pointer"
+                    className="relative p-2 rounded-xl text-text-secondary hover:text-brand-purple hover:bg-bg-pill transition-all cursor-pointer"
                   >
                     <Bell className="h-4.5 w-4.5" />
                     {notifications.some(n => !n.isRead) && (
@@ -380,7 +382,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Link
                         href="/profile"
                         onClick={() => setProfileDropdownOpen(false)}
-                        className="flex items-center space-x-2 w-full px-3 py-2 text-xs font-bold text-text-secondary hover:bg-bg-pill hover:text-text-primary text-left"
+                        className="flex items-center space-x-2 w-full px-3 py-2 text-xs font-bold text-text-secondary hover:bg-bg-pill hover:text-brand-purple text-left"
                       >
                         <UserIcon className="h-3.5 w-3.5" />
                         <span>My Profile</span>
@@ -388,7 +390,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Link
                         href="/matches"
                         onClick={() => setProfileDropdownOpen(false)}
-                        className="flex items-center space-x-2 w-full px-3 py-2 text-xs font-bold text-text-secondary hover:bg-bg-pill hover:text-text-primary text-left"
+                        className="flex items-center space-x-2 w-full px-3 py-2 text-xs font-bold text-text-secondary hover:bg-bg-pill hover:text-brand-purple text-left"
                       >
                         <Heart className="h-3.5 w-3.5" />
                         <span>My Matches</span>
