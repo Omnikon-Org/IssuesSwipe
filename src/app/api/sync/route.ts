@@ -17,7 +17,23 @@ export async function POST(req: Request) {
       // Ignored if body is empty or invalid
     }
 
-    const { searchText, languages: customLangs, labels: customLabels } = customFilters as any;
+    const { searchText, languages: customLangs, labels: customLabels, minStars: rawMinStars, maxStars: rawMaxStars } = customFilters as any;
+
+    // Coerce optional star bounds; ignore missing/invalid/negative values.
+    const toStar = (v: any): number | undefined => {
+      if (v === undefined || v === null || v === '') return undefined;
+      const n = Number(v);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : undefined;
+    };
+    const minStars = toStar(rawMinStars);
+    const maxStars = toStar(rawMaxStars);
+
+    if (minStars !== undefined && maxStars !== undefined && minStars > maxStars) {
+      return NextResponse.json(
+        { success: false, message: 'Minimum stars cannot be greater than maximum stars.' },
+        { status: 400 }
+      );
+    }
 
     const dbUser = await db.user.findUnique({ where: { id: user.id } });
     if (!dbUser) return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -26,11 +42,13 @@ export async function POST(req: Request) {
     const topics = JSON.parse(dbUser.preferredTopics || '[]');
 
     const result = await syncIssuesFromGitHub(
-      dbUser.githubToken || undefined, 
-      languages, 
+      dbUser.githubToken || undefined,
+      languages,
       topics,
       searchText,
-      customLabels
+      customLabels,
+      minStars,
+      maxStars
     );
     
     // Add notification on successful sync

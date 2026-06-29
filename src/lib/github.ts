@@ -83,12 +83,91 @@ const GITHUB_SEARCH_QUERY = `
   }
 `;
 
+// Builds a GitHub `stars:` range qualifier from optional bounds.
+// Returns '' when no usable range is supplied so callers can detect "no filter".
+function buildStarQualifier(minStars?: number, maxStars?: number): string {
+  const hasMin = typeof minStars === 'number' && !Number.isNaN(minStars);
+  const hasMax = typeof maxStars === 'number' && !Number.isNaN(maxStars);
+  if (hasMin && hasMax) return `stars:${minStars}..${maxStars}`;
+  if (hasMin) return `stars:>=${minStars}`;
+  if (hasMax) return `stars:<=${maxStars}`;
+  return '';
+}
+
+// Upserts a single repository + issue pair into the DB.
+// `node` is a search/issues item or a /repos/.../issues item (same shape),
+// `repoNode` is the GitHub repository object. Returns true if persisted.
+async function persistIssue(node: any, repoNode: any): Promise<boolean> {
+  if (!repoNode) return false;
+
+  const labels: string[] = node.labels?.map((l: { name: string }) => l.name) || [];
+
+  // 1. Create or Update Repository
+  const repo = await db.repository.upsert({
+    where: { githubId: repoNode.id.toString() },
+    update: {
+      name: repoNode.name,
+      fullName: repoNode.full_name,
+      languages: JSON.stringify([repoNode.language || 'TypeScript']),
+      topics: JSON.stringify(repoNode.topics || []),
+      owner: repoNode.owner.login,
+      description: repoNode.description,
+      url: repoNode.html_url,
+      stars: repoNode.stargazers_count,
+      language: repoNode.language || 'TypeScript',
+    },
+    create: {
+      githubId: repoNode.id.toString(),
+      name: repoNode.name,
+      fullName: repoNode.full_name,
+      languages: JSON.stringify([repoNode.language || 'TypeScript']),
+      topics: JSON.stringify(repoNode.topics || []),
+      owner: repoNode.owner.login,
+      description: repoNode.description,
+      url: repoNode.html_url,
+      stars: repoNode.stargazers_count,
+      language: repoNode.language || 'TypeScript',
+    },
+  });
+
+  // 2. Map labels to difficulty
+  const isGoodFirst = labels.some((l: string) => l.toLowerCase().includes('good first issue'));
+  const difficulty = isGoodFirst ? 'Beginner' : Math.random() > 0.5 ? 'Intermediate' : 'Advanced';
+
+  // 3. Create or Update Issue
+  await db.issue.upsert({
+    where: { repositoryId_githubNumber: { repositoryId: repo.id, githubNumber: node.number } },
+    update: {
+      title: node.title,
+      description: node.body || '',
+      url: node.html_url,
+      githubNumber: node.number,
+      labels: JSON.stringify(labels),
+      difficulty,
+    },
+    create: {
+      githubId: node.id.toString(),
+      title: node.title,
+      description: node.body || '',
+      url: node.html_url,
+      githubNumber: node.number,
+      repositoryId: repo.id,
+      labels: JSON.stringify(labels),
+      difficulty,
+    },
+  });
+
+  return true;
+}
+
 export async function syncIssuesFromGitHub(
   accessToken?: string,
   preferredLanguages: string[] = [],
   preferredTopics: string[] = [],
   searchText?: string,
-  customLabels: string[] = []
+  customLabels: string[] = [],
+  minStars?: number,
+  maxStars?: number
 ): Promise<GitHubIssueSyncResult> {
   const token = accessToken || process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
 
@@ -123,126 +202,126 @@ export async function syncIssuesFromGitHub(
       return (data.items || []).filter((item: any) => !item.pull_request);
     };
 
-    let issues: any[] = [];
-    const baseQuery = ['type:issue', 'state:open'];
-    if (searchText) baseQuery.push(searchText);
-    if (customLabels.length > 0) {
-      customLabels.forEach(label => baseQuery.push(`label:"${label}"`));
-    } else {
-      baseQuery.push('label:"good first issue"');
-    }
-    
-    // 1. Try strict match (Languages + Topics)
-    let queryParts = [...baseQuery];
-    if (preferredLanguages.length > 0) {
-      preferredLanguages.forEach(l => queryParts.push(`language:${l}`));
-    }
-    if (preferredTopics.length > 0) {
-      preferredTopics.forEach(t => queryParts.push(t));
-    }
-    issues = await executeRestSearch(queryParts);
+    // Build the set of labels to filter issues by (shared across both paths).
+    const issueLabels = customLabels.length > 0 ? customLabels : ['good first issue'];
 
-    // 2. Fallback: Only Languages
-    if (issues.length === 0 && preferredTopics.length > 0) {
-      console.log('[Sync] Strict match returned 0, trying only languages...');
-      queryParts = [...baseQuery];
+    // The star range turns on the repo-search-first strategy. GitHub's
+    // search/issues endpoint can't filter by repo stars, so when a range is
+    // requested we first find repos in range, then pull their issues.
+    const starQualifier = buildStarQualifier(minStars, maxStars);
+    const starFilterRequested = starQualifier !== '';
+
+    // (node, repoNode) pairs ready to persist, gathered by whichever path runs.
+    const pairs: { node: any; repoNode: any }[] = [];
+
+    if (starFilterRequested) {
+      // --- Repo-search-first path (dynamic star range) ---
+      const repoQueryParts = [starQualifier];
+      preferredLanguages.forEach(l => repoQueryParts.push(`language:${l}`));
+      preferredTopics.forEach(t => repoQueryParts.push(`topic:${t}`));
+
+      const repoQ = encodeURIComponent(repoQueryParts.join(' '));
+      const repoUrl = `https://api.github.com/search/repositories?q=${repoQ}&per_page=15&sort=updated`;
+      console.log(`[Sync] GitHub repo search query: ${repoQueryParts.join(' ')}`);
+
+      const repoRes = await fetch(repoUrl, { headers });
+      if (!repoRes.ok) {
+        throw new Error(`GitHub repository search returned status ${repoRes.status}`);
+      }
+      const repoData = await repoRes.json();
+      const repos = (repoData.items || []) as any[];
+
+      // For each in-range repo, fetch its open issues matching the labels.
+      for (const repoNode of repos) {
+        const labelParam = encodeURIComponent(issueLabels.join(','));
+        const issuesUrl = `https://api.github.com/repos/${repoNode.full_name}/issues?state=open&labels=${labelParam}&per_page=10`;
+        try {
+          const issuesRes = await fetch(issuesUrl, { headers });
+          if (!issuesRes.ok) {
+            console.warn(`Failed to fetch issues for ${repoNode.full_name} - Status: ${issuesRes.status}`);
+            continue;
+          }
+          const repoIssues = (await issuesRes.json()) as any[];
+          repoIssues
+            .filter(issue => !issue.pull_request)
+            .forEach(node => pairs.push({ node, repoNode }));
+        } catch (e) {
+          console.warn(`Error fetching issues for ${repoNode.full_name}`);
+        }
+      }
+    } else {
+      // --- Default issue-search path (unchanged behaviour) ---
+      let issues: any[] = [];
+      const baseQuery = ['type:issue', 'state:open'];
+      if (searchText) baseQuery.push(searchText);
+      issueLabels.forEach(label => baseQuery.push(`label:"${label}"`));
+
+      // 1. Try strict match (Languages + Topics)
+      let queryParts = [...baseQuery];
       if (preferredLanguages.length > 0) {
         preferredLanguages.forEach(l => queryParts.push(`language:${l}`));
       }
+      if (preferredTopics.length > 0) {
+        preferredTopics.forEach(t => queryParts.push(t));
+      }
       issues = await executeRestSearch(queryParts);
-    }
 
-    // 3. Fallback: Broadest possible search
-    if (issues.length === 0 && preferredLanguages.length > 0) {
-      console.log('[Sync] Language match returned 0, trying broad search...');
-      issues = await executeRestSearch([...baseQuery]);
+      // 2. Fallback: Only Languages
+      if (issues.length === 0 && preferredTopics.length > 0) {
+        console.log('[Sync] Strict match returned 0, trying only languages...');
+        queryParts = [...baseQuery];
+        if (preferredLanguages.length > 0) {
+          preferredLanguages.forEach(l => queryParts.push(`language:${l}`));
+        }
+        issues = await executeRestSearch(queryParts);
+      }
+
+      // 3. Fallback: Broadest possible search
+      if (issues.length === 0 && preferredLanguages.length > 0) {
+        console.log('[Sync] Language match returned 0, trying broad search...');
+        issues = await executeRestSearch([...baseQuery]);
+      }
+
+      // Fetch Unique Repositories Sequentially to avoid Abuse/Secondary rate limits
+      const uniqueRepoUrls = [...new Set(issues.map(i => i.repository_url))];
+      const repoDataMap = new Map();
+
+      for (const repoUrl of uniqueRepoUrls) {
+        if (typeof repoUrl !== 'string') continue;
+        try {
+          const repoRes = await fetch(repoUrl, { headers });
+          if (repoRes.ok) {
+            repoDataMap.set(repoUrl, await repoRes.json());
+          } else {
+            console.warn(`Failed to fetch repo ${repoUrl} - Status: ${repoRes.status}`);
+          }
+        } catch (e) {
+          console.warn(`Error fetching repo ${repoUrl}`);
+        }
+      }
+
+      issues.forEach(node => {
+        const repoNode = repoDataMap.get(node.repository_url);
+        if (repoNode) pairs.push({ node, repoNode });
+      });
     }
 
     let syncCount = 0;
-
-    // Fetch Unique Repositories Sequentially to avoid Abuse/Secondary rate limits
-    const uniqueRepoUrls = [...new Set(issues.map(i => i.repository_url))];
-    const repoDataMap = new Map();
-    
-    for (const repoUrl of uniqueRepoUrls) {
-      if (typeof repoUrl !== 'string') continue;
-      try {
-        const repoRes = await fetch(repoUrl, { headers });
-        if (repoRes.ok) {
-          repoDataMap.set(repoUrl, await repoRes.json());
-        } else {
-          console.warn(`Failed to fetch repo ${repoUrl} - Status: ${repoRes.status}`);
-        }
-      } catch (e) {
-        console.warn(`Error fetching repo ${repoUrl}`);
-      }
-    }
-
-    for (const node of issues) {
-      const repoNode = repoDataMap.get(node.repository_url);
-      if (!repoNode) continue; // Skip if repo data couldn't be fetched
-
-      const labels: string[] = node.labels?.map((l: { name: string }) => l.name) || [];
-
-      // 1. Create or Update Repository
-      const repo = await db.repository.upsert({
-        where: { githubId: repoNode.id.toString() }, // REST API returns id as number
-        update: {
-          name: repoNode.name,
-          fullName: repoNode.full_name,
-          languages: JSON.stringify([repoNode.language || 'TypeScript']),
-          topics: JSON.stringify(repoNode.topics || []),
-          owner: repoNode.owner.login,
-          description: repoNode.description,
-          url: repoNode.html_url,
-          stars: repoNode.stargazers_count,
-          language: repoNode.language || 'TypeScript',
-        },
-        create: {
-          githubId: repoNode.id.toString(),
-          name: repoNode.name,
-          fullName: repoNode.full_name,
-          languages: JSON.stringify([repoNode.language || 'TypeScript']),
-          topics: JSON.stringify(repoNode.topics || []),
-          owner: repoNode.owner.login,
-          description: repoNode.description,
-          url: repoNode.html_url,
-          stars: repoNode.stargazers_count,
-          language: repoNode.language || 'TypeScript',
-        },
-      });
-
-      // 2. Map labels to difficulty/estimated time
-      const isGoodFirst = labels.some((l: string) => l.toLowerCase().includes('good first issue'));
-      const difficulty = isGoodFirst ? 'Beginner' : Math.random() > 0.5 ? 'Intermediate' : 'Advanced';
-      
-      // 3. Create or Update Issue
-      await db.issue.upsert({
-        where: { repositoryId_githubNumber: { repositoryId: repo.id, githubNumber: node.number } },
-        update: {
-          title: node.title,
-          description: node.body || '',
-          url: node.html_url, // REST uses html_url for the web link
-          githubNumber: node.number,
-          labels: JSON.stringify(labels),
-          difficulty,
-        },
-        create: {
-          githubId: node.id.toString(),
-          title: node.title,
-          description: node.body || '',
-          url: node.html_url,
-          githubNumber: node.number,
-          repositoryId: repo.id,
-          labels: JSON.stringify(labels),
-          difficulty,
-        },
-      });
-
-      syncCount++;
+    for (const { node, repoNode } of pairs) {
+      if (await persistIssue(node, repoNode)) syncCount++;
     }
 
     if (syncCount === 0) {
+      // When the user explicitly set a star range, respect it: return an honest
+      // empty result so the UI can prompt them to change their criteria.
+      // Never silently fall back to simulated data here.
+      if (starFilterRequested) {
+        return {
+          success: true,
+          issuesSynced: 0,
+          message: 'No issues found for the selected star range. Try widening your criteria.',
+        };
+      }
       console.log('GitHub API returned 0 issues, simulating to ensure user has content...');
       return simulateSync('GitHub returned 0 matches, added simulated issues instead.');
     }
