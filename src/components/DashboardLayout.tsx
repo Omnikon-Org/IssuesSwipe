@@ -235,28 +235,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Target className="h-3.5 w-3.5 text-red-500" />
                       <span>Issues Solved</span>
                     </div>
-                    <span className="text-xs font-black text-text-primary">47</span>
+                    <span className="text-xs font-black text-text-primary">{user.issuesSolved ?? 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2 text-text-secondary text-xs font-bold">
                       <GitMerge className="h-3.5 w-3.5 text-brand-purple" />
                       <span>PRs Merged</span>
                     </div>
-                    <span className="text-xs font-black text-text-primary">23</span>
+                    <span className="text-xs font-black text-text-primary">{user.prsMerged ?? 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2 text-text-secondary text-xs font-bold">
                       <Database className="h-3.5 w-3.5 text-blue-500" />
                       <span>Repositories</span>
                     </div>
-                    <span className="text-xs font-black text-text-primary">8</span>
+                    <span className="text-xs font-black text-text-primary">{user.repositoriesCount ?? 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2 text-text-secondary text-xs font-bold">
-                      <Flame className="h-3.5 w-3.5 text-orange-500 fill-orange-500" />
+                      <Flame className="h-3.5 w-3.5 text-brand-orange" />
                       <span>Streak</span>
                     </div>
-                    <span className="text-xs font-black text-text-primary">{user.dailyStreak} days</span>
+                    <span className="text-xs font-black text-text-primary">{user.dailyStreak ?? 0} days</span>
                   </div>
                 </div>
               </div>

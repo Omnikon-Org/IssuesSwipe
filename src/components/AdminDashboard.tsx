@@ -42,10 +42,6 @@ export default function AdminDashboard() {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
-
   async function fetchAnalytics() {
     try {
       const res = await fetch('/api/admin/analytics');
@@ -59,6 +55,10 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
 
   const handleSyncIssues = async () => {
     setSyncing(true);

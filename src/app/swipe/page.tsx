@@ -23,11 +23,11 @@ export default async function SwipePage() {
 
   return (
     <DashboardLayout>
-      <div className="flex-grow flex flex-col justify-start items-center pt-12 pb-6 px-4 md:px-8 relative">
+      <div className={`flex-grow flex flex-col items-center px-4 md:px-8 relative ${user ? 'justify-start pt-12 pb-6' : 'justify-center h-full'}`}>
         {user ? (
           <SwipeFeed />
         ) : (
-          <div className="flex flex-col items-center justify-center mt-20 text-center space-y-6 max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center text-center space-y-6 max-w-md mx-auto">
             <div className="p-4 bg-brand-purple/10 rounded-full mb-2">
               <svg className="h-10 w-10 text-brand-purple" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />

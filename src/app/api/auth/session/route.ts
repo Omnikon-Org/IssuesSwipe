@@ -21,12 +21,25 @@ export async function POST(request: Request) {
   try {
     const { idToken } = await request.json();
     
-    // Verify the ID token
-    const decodedIdToken = await getAdminAuth().verifyIdToken(idToken);
-
-    // Create session cookie
+    let decodedIdToken;
+    let sessionCookie;
     const expiresIn = 60 * 60 * 24 * 7 * 1000; // 7 days
-    const sessionCookie = await getAdminAuth().createSessionCookie(idToken, { expiresIn });
+
+    if (process.env.NEXT_PUBLIC_DEV_MODE === 'true' && idToken === 'mock_developer_token') {
+      decodedIdToken = {
+        uid: 'mock_dev_github_user_12345',
+        name: 'Rishi Bhardwaj',
+        email: 'rishi@example.com',
+        picture: 'https://github.com/rishibhardwaj.png',
+      };
+      sessionCookie = 'mock_dev_session_cookie_12345';
+    } else {
+      // Verify the ID token
+      decodedIdToken = await getAdminAuth().verifyIdToken(idToken);
+
+      // Create session cookie
+      sessionCookie = await getAdminAuth().createSessionCookie(idToken, { expiresIn });
+    }
 
     // Sync user to database
     let user = await db.user.findFirst({

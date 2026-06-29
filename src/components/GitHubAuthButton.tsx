@@ -19,10 +19,15 @@ export default function GitHubAuthButton({ children, className, redirectTo = '/s
     setIsLoading(true);
 
     try {
-      const provider = new GithubAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
+      let idToken = '';
       
-      const idToken = await userCredential.user.getIdToken();
+      if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+        idToken = 'mock_developer_token';
+      } else {
+        const provider = new GithubAuthProvider();
+        const userCredential = await signInWithPopup(auth, provider);
+        idToken = await userCredential.user.getIdToken();
+      }
 
       const res = await fetch('/api/auth/session', {
         method: 'POST',

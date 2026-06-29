@@ -23,6 +23,9 @@ model User {
   xp            Int      @default(0)
   rank          String   @default("New Contributor") // rank name
   dailyStreak   Int      @default(0)
+  issuesSolved  Int      @default(0)
+  prsMerged     Int      @default(0)
+  repositoriesCount Int  @default(0)
   lastSwiped    DateTime?
   
   // Relations
@@ -55,6 +58,8 @@ model Repository {
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([stars])
 }
 
 model Issue {

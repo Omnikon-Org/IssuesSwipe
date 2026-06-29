@@ -108,7 +108,7 @@ export default function Navbar() {
                     className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/20'
-                        : 'text-gray-400 hover:bg-dark-border hover:text-white'
+                        : 'text-text-secondary hover:bg-bg-pill hover:text-text-primary'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -139,21 +139,21 @@ export default function Navbar() {
                         className="h-8 w-8 rounded-full border border-dark-border group-hover:border-brand-blue/40 transition-colors"
                       />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-dark-border flex items-center justify-center text-xs font-bold text-white">
+                      <div className="h-8 w-8 rounded-full bg-bg-pill flex items-center justify-center text-xs font-bold text-text-primary border border-dark-border">
                         {session.username[0]?.toUpperCase()}
                       </div>
                     )}
                     <div className="text-left">
-                      <p className="text-xs font-semibold text-gray-200 group-hover:text-brand-blue transition-colors">
+                      <p className="text-xs font-semibold text-text-primary group-hover:text-brand-blue transition-colors">
                         @{session.username}
                       </p>
-                      <p className="text-[10px] text-gray-400">{session.rank}</p>
+                      <p className="text-[10px] text-text-tertiary">{session.rank}</p>
                     </div>
                   </Link>
 
                   <button
                     onClick={handleLogout}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-brand-red hover:bg-brand-red/10 transition-all cursor-pointer"
+                    className="p-1.5 rounded-lg text-text-tertiary hover:text-brand-red hover:bg-brand-red/10 transition-all cursor-pointer"
                     title="Logout"
                   >
                     <LogOut className="h-4 w-4" />
@@ -179,7 +179,7 @@ export default function Navbar() {
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-gray-400 hover:bg-dark-border hover:text-white"
+              className="p-2 rounded-lg text-text-secondary hover:bg-bg-pill hover:text-text-primary"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -201,7 +201,7 @@ export default function Navbar() {
                 className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
                     ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/20'
-                    : 'text-gray-400 hover:bg-dark-border hover:text-white'
+                    : 'text-text-secondary hover:bg-bg-pill hover:text-text-primary'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -218,13 +218,13 @@ export default function Navbar() {
               {session.avatar ? (
                 <img src={session.avatar} alt={session.username} className="h-8 w-8 rounded-full" />
               ) : (
-                <div className="h-8 w-8 rounded-full bg-dark-border flex items-center justify-center text-xs font-bold">
+                <div className="h-8 w-8 rounded-full bg-bg-pill border border-dark-border flex items-center justify-center text-xs font-bold text-text-primary">
                   {session.username[0]?.toUpperCase()}
                 </div>
               )}
               <div className="text-left">
-                <p className="text-xs font-semibold text-gray-200">@{session.username}</p>
-                <p className="text-[10px] text-gray-400">{session.rank}</p>
+                <p className="text-xs font-semibold text-text-primary">@{session.username}</p>
+                <p className="text-[10px] text-text-tertiary">{session.rank}</p>
               </div>
             </Link>
             <button

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useAnimation } from 'framer-motion';
 import { Flame, Star, GitPullRequest, Bookmark, Sparkles, RefreshCw, X, Check, Award, Clock, HelpCircle, Heart, ChevronDown, ListFilter, MessageSquare, MoreHorizontal } from 'lucide-react';
+import FilterBar from './FilterBar';
 
 interface Repository {
   id: string;
@@ -15,6 +16,7 @@ interface Repository {
   stars: number;
   language: string | null;
   readmeText?: string | null;
+  topics?: string | null;
 }
 
 interface Issue {
@@ -55,11 +57,8 @@ export default function SwipeFeed() {
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
   const [minMatchScore, setMinMatchScore] = useState('All');
   const [goodFirstIssueOnly, setGoodFirstIssueOnly] = useState(true);
-
-  // Dropdown UI state
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const [diffDropdownOpen, setDiffDropdownOpen] = useState(false);
-  const [scoreDropdownOpen, setScoreDropdownOpen] = useState(false);
+  const [selectedStars, setSelectedStars] = useState('All');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // Framer Motion controls
   const motionX = useMotionValue(0);
@@ -71,17 +70,42 @@ export default function SwipeFeed() {
   const opacityNope = useTransform(motionX, [-150, 0], [1, 0]);
   const opacityContribute = useTransform(motionX, [0, 150], [0, 1]);
 
+  // Read URL search params on mount
   useEffect(() => {
-    fetchFeed();
-  }, [selectedLanguage, selectedDifficulty, minMatchScore]);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlLang = params.get('language');
+      const urlDiff = params.get('difficulty');
+      const urlScore = params.get('score');
+      const urlStars = params.get('stars');
+      const urlTags = params.get('tags');
+      const urlGfi = params.get('gfi');
 
-  // Re-filter locally when goodFirstIssueOnly changes (no API call needed)
-  useEffect(() => {
-    if (!loading) {
-      fetchFeed();
+      if (urlLang) setSelectedLanguage(urlLang);
+      if (urlDiff) setSelectedDifficulty(urlDiff);
+      if (urlScore) setMinMatchScore(urlScore);
+      if (urlStars) setSelectedStars(urlStars);
+      if (urlTags) setSelectedTags(urlTags.split(',').filter(Boolean));
+      if (urlGfi) setGoodFirstIssueOnly(urlGfi === 'true');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goodFirstIssueOnly]);
+  }, []);
+
+  // Update URL params when filter states change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams();
+      if (selectedLanguage !== 'All') params.set('language', selectedLanguage);
+      if (selectedDifficulty !== 'All') params.set('difficulty', selectedDifficulty);
+      if (minMatchScore !== 'All') params.set('score', minMatchScore);
+      if (selectedStars !== 'All') params.set('stars', selectedStars);
+      if (selectedTags.length > 0) params.set('tags', selectedTags.join(','));
+      if (goodFirstIssueOnly) params.set('gfi', 'true');
+
+      const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+    fetchFeed();
+  }, [selectedLanguage, selectedDifficulty, minMatchScore, selectedStars, selectedTags, goodFirstIssueOnly]);
 
   async function fetchFeed() {
     setLoading(true);
@@ -89,6 +113,8 @@ export default function SwipeFeed() {
       const q = new URLSearchParams();
       if (selectedLanguage !== 'All') q.append('language', selectedLanguage);
       if (selectedDifficulty !== 'All') q.append('difficulty', selectedDifficulty);
+      if (selectedStars !== 'All') q.append('stars', selectedStars);
+      if (selectedTags.length > 0) q.append('tags', selectedTags.join(','));
 
       const res = await fetch(`/api/issues/feed?${q.toString()}`);
       if (res.ok) {
@@ -109,11 +135,17 @@ export default function SwipeFeed() {
           if (!repoMap[repoId]) {
             // Collect all unique labels from all issues in this repo
             const allLabels = JSON.parse(JSON.stringify(issue.labels || []));
+            let repoTopics: string[] = [];
+            try {
+              repoTopics = JSON.parse(issue.repository.topics || '[]');
+            } catch (e) {
+              // ignore
+            }
             repoMap[repoId] = {
               repository: issue.repository,
               issues: [],
               matchScore: 0,
-              techTags: Array.from(new Set([issue.repository.language, ...allLabels])).filter(Boolean) as string[],
+              techTags: Array.from(new Set([issue.repository.language, ...allLabels, ...repoTopics])).filter(Boolean) as string[],
             };
           }
           repoMap[repoId].issues.push(issue);
@@ -351,92 +383,21 @@ export default function SwipeFeed() {
       </div>
 
       {/* Filters Row */}
-      <div className="w-full flex flex-wrap items-center justify-between gap-3 mb-6 relative z-30">
-        <div className="flex flex-wrap gap-2">
-          {/* Match Score Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => { setScoreDropdownOpen(!scoreDropdownOpen); setLangDropdownOpen(false); setDiffDropdownOpen(false); }}
-              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer"
-            >
-              <span>Match Score: {minMatchScore === 'All' ? 'All' : `>${minMatchScore}%`}</span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-            </button>
-            {scoreDropdownOpen && (
-              <div className="absolute top-9 left-0 w-36 bg-dark-card border border-dark-border rounded-xl shadow-lg p-1.5 space-y-0.5">
-                {['All', '90', '80', '70'].map((score) => (
-                  <button
-                    key={score}
-                    onClick={() => { setMinMatchScore(score); setScoreDropdownOpen(false); }}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-brand-purple"
-                  >
-                    {score === 'All' ? 'All Scores' : `>${score}% Match`}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+      <FilterBar
+        selectedLanguage={selectedLanguage}
+        setSelectedLanguage={setSelectedLanguage}
+        selectedDifficulty={selectedDifficulty}
+        setSelectedDifficulty={setSelectedDifficulty}
+        minMatchScore={minMatchScore}
+        setMinMatchScore={setMinMatchScore}
+        goodFirstIssueOnly={goodFirstIssueOnly}
+        setGoodFirstIssueOnly={setGoodFirstIssueOnly}
+        selectedStars={selectedStars}
+        setSelectedStars={setSelectedStars}
+        selectedTags={selectedTags}
+        setSelectedTags={setSelectedTags}
+      />
 
-          {/* Language Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => { setLangDropdownOpen(!langDropdownOpen); setScoreDropdownOpen(false); setDiffDropdownOpen(false); }}
-              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer"
-            >
-              <span>Language: {selectedLanguage}</span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-            </button>
-            {langDropdownOpen && (
-              <div className="absolute top-9 left-0 w-36 bg-dark-card border border-dark-border rounded-xl shadow-lg p-1.5 space-y-0.5">
-                {['All', 'TypeScript', 'JavaScript', 'Python', 'Go', 'Rust'].map((lang) => (
-                  <button
-                    key={lang}
-                    onClick={() => { setSelectedLanguage(lang); setLangDropdownOpen(false); }}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-brand-purple"
-                  >
-                    {lang}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Difficulty Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => { setDiffDropdownOpen(!diffDropdownOpen); setLangDropdownOpen(false); setScoreDropdownOpen(false); }}
-              className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer"
-            >
-              <span>Difficulty: {selectedDifficulty}</span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-            </button>
-            {diffDropdownOpen && (
-              <div className="absolute top-9 left-0 w-36 bg-dark-card border border-dark-border rounded-xl shadow-lg p-1.5 space-y-0.5">
-                {['All', 'Beginner', 'Intermediate', 'Advanced'].map((diff) => (
-                  <button
-                    key={diff}
-                    onClick={() => { setSelectedDifficulty(diff); setDiffDropdownOpen(false); }}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-brand-purple"
-                  >
-                    {diff}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Good First Issue Switch Toggle */}
-          <button
-            onClick={() => setGoodFirstIssueOnly(!goodFirstIssueOnly)}
-            className="px-3.5 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-2 cursor-pointer transition-all"
-          >
-            <span>Good First Issue</span>
-            <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors cursor-pointer ${goodFirstIssueOnly ? 'bg-brand-purple' : 'bg-bg-pill'}`}>
-              <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${goodFirstIssueOnly ? 'translate-x-3.5' : 'translate-x-0'}`} />
-            </div>
-          </button>
-        </div>
-      </div>
 
       {/* Empty State */}
       {!activeCard ? (

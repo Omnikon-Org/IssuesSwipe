@@ -218,6 +218,8 @@ export async function syncIssuesFromGitHub(
       // --- Repo-search-first path (dynamic star range) ---
       const repoQueryParts = [starQualifier];
       preferredLanguages.forEach(l => repoQueryParts.push(`language:${l}`));
+      
+      // If we have custom topics/tags, filter by them
       preferredTopics.forEach(t => repoQueryParts.push(`topic:${t}`));
 
       const repoQ = encodeURIComponent(repoQueryParts.join(' '));
@@ -392,7 +394,7 @@ async function simulateSync(note?: string): Promise<GitHubIssueSyncResult> {
         name: repoData.name,
         fullName: `${repoData.owner}/${repoData.name}`,
         languages: JSON.stringify([repoData.lang]),
-        topics: JSON.stringify([]),
+        topics: JSON.stringify(['hacktoberfest', repoData.lang.toLowerCase(), 'good-first-issue', 'open-source']),
         owner: repoData.owner,
         description: repoData.desc,
         readmeText: `# ${repoData.name}\n\n${repoData.desc}\n\n## Getting Started\n\nCheck out the documentation to get started with ${repoData.name}.\n\n## Contributing\n\nWe welcome contributions! Please read our contributing guide.`,
@@ -416,6 +418,7 @@ async function simulateSync(note?: string): Promise<GitHubIssueSyncResult> {
           update: {
             title: title,
             description: `This issue needs help in ${repoData.owner}/${repoData.name}. Great opportunity for open source contribution.`,
+            url: `${repoData.url}/issues`,
             labels: JSON.stringify(isDocOrBug ? ['good first issue', 'documentation'] : ['good first issue', 'help wanted']),
             difficulty,
           },
@@ -423,7 +426,7 @@ async function simulateSync(note?: string): Promise<GitHubIssueSyncResult> {
             githubId: randomId,
             title: title,
             description: `This issue needs help in ${repoData.owner}/${repoData.name}. Great opportunity for open source contribution.`,
-            url: `${repoData.url}/issues/${issueNum}`,
+            url: `${repoData.url}/issues`,
             githubNumber: issueNum,
             repositoryId: repo.id,
             labels: JSON.stringify(isDocOrBug ? ['good first issue', 'documentation'] : ['good first issue', 'help wanted']),

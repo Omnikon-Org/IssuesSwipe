@@ -96,8 +96,8 @@ export default function OnboardingForm() {
     <div className="max-w-xl mx-auto w-full relative">
       {/* Onboarding Header */}
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-extrabold text-white">Let's build your feed</h2>
-        <p className="text-sm text-gray-400 mt-2">Step {step} of 3</p>
+        <h2 className="text-3xl font-extrabold text-text-primary">Let&apos;s build your feed</h2>
+        <p className="text-sm text-text-secondary mt-2">Step {step} of 3</p>
         
         {/* Progress bar */}
         <div className="w-full h-1.5 bg-dark-border rounded-full mt-4 overflow-hidden">
@@ -111,7 +111,7 @@ export default function OnboardingForm() {
       </div>
 
       {/* Card container */}
-      <div className="glass-premium rounded-3xl p-8 border border-white/5 glow-purple">
+      <div className="glass-premium rounded-3xl p-8 border-none glow-purple">
         {step === 1 && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -121,9 +121,9 @@ export default function OnboardingForm() {
           >
             <div className="flex items-center space-x-3 text-brand-green">
               <Code2 className="h-6 w-6" />
-              <h3 className="text-xl font-bold text-white">What languages do you code in?</h3>
+              <h3 className="text-xl font-bold text-text-primary">What languages do you code in?</h3>
             </div>
-            <p className="text-sm text-gray-400">Select all that apply. We'll use these to filter repos.</p>
+            <p className="text-sm text-text-secondary">Select all that apply. We&apos;ll use these to filter repos.</p>
             
             <div className="grid grid-cols-2 gap-3">
               {languagesList.map((lang) => {
@@ -137,7 +137,7 @@ export default function OnboardingForm() {
                     className={`flex items-center justify-between px-5 py-4 rounded-xl border-2 text-sm font-bold transition-all duration-300 cursor-pointer shadow-sm ${
                       isSelected
                         ? 'bg-brand-green/10 border-brand-green text-brand-green shadow-brand-green/20'
-                        : 'bg-dark-bg/60 border-white/5 text-gray-400 hover:border-white/20 hover:text-white hover:bg-dark-bg'
+                        : 'bg-dark-bg border-dark-border text-text-secondary hover:border-text-tertiary hover:text-text-primary hover:bg-bg-pill'
                     }`}
                   >
                     <span className="tracking-wide">{lang}</span>
@@ -158,9 +158,9 @@ export default function OnboardingForm() {
           >
             <div className="flex items-center space-x-3 text-brand-blue">
               <Rocket className="h-6 w-6" />
-              <h3 className="text-xl font-bold text-white">What is your experience level?</h3>
+              <h3 className="text-xl font-bold text-text-primary">What is your experience level?</h3>
             </div>
-            <p className="text-sm text-gray-400">Be honest! This helps us customize matching difficulty score weights.</p>
+            <p className="text-sm text-text-secondary">Be honest! This helps us customize matching difficulty score weights.</p>
             
             <div className="space-y-3">
               {experienceLevels.map((lvl) => {
@@ -174,11 +174,11 @@ export default function OnboardingForm() {
                     className={`w-full text-left px-6 py-5 rounded-xl border-2 flex flex-col transition-all duration-300 cursor-pointer shadow-sm ${
                       isSelected
                         ? 'bg-brand-blue/10 border-brand-blue text-brand-blue shadow-brand-blue/20'
-                        : 'bg-dark-bg/60 border-white/5 text-gray-400 hover:border-white/20 hover:text-white hover:bg-dark-bg'
+                        : 'bg-dark-bg border-dark-border text-text-secondary hover:border-text-tertiary hover:text-text-primary hover:bg-bg-pill'
                     }`}
                   >
-                    <span className="font-extrabold text-base text-white tracking-wide">{lvl.label}</span>
-                    <span className={`text-sm mt-1.5 leading-relaxed ${isSelected ? 'text-brand-blue/80' : 'text-gray-500'}`}>{lvl.desc}</span>
+                    <span className={`font-extrabold text-base tracking-wide ${isSelected ? 'text-brand-blue' : 'text-text-primary'}`}>{lvl.label}</span>
+                    <span className={`text-sm mt-1.5 leading-relaxed ${isSelected ? 'text-brand-blue/80' : 'text-text-secondary'}`}>{lvl.desc}</span>
                   </motion.button>
                 );
               })}
@@ -195,9 +195,9 @@ export default function OnboardingForm() {
           >
             <div className="flex items-center space-x-3 text-brand-red">
               <Heart className="h-6 w-6" />
-              <h3 className="text-xl font-bold text-white">Select your interests</h3>
+              <h3 className="text-xl font-bold text-text-primary">Select your interests</h3>
             </div>
-            <p className="text-sm text-gray-400">What fields are you looking to contribute to?</p>
+            <p className="text-sm text-text-secondary">What fields are you looking to contribute to?</p>
             
             <div className="grid grid-cols-2 gap-3">
               {interestsList.map((interest) => {
@@ -211,7 +211,7 @@ export default function OnboardingForm() {
                     className={`flex items-center justify-between px-5 py-4 rounded-xl border-2 text-sm font-bold transition-all duration-300 cursor-pointer shadow-sm ${
                       isSelected
                         ? 'bg-brand-red/10 border-brand-red text-brand-red shadow-brand-red/20'
-                        : 'bg-dark-bg/60 border-white/5 text-gray-400 hover:border-white/20 hover:text-white hover:bg-dark-bg'
+                        : 'bg-dark-bg border-dark-border text-text-secondary hover:border-text-tertiary hover:text-text-primary hover:bg-bg-pill'
                     }`}
                   >
                     <span className="tracking-wide">{interest}</span>
@@ -228,7 +228,7 @@ export default function OnboardingForm() {
           {step > 1 ? (
             <button
               onClick={handlePrevStep}
-              className="px-5 py-2.5 rounded-xl border border-white/10 text-gray-400 hover:text-white text-sm font-semibold transition-all cursor-pointer"
+              className="px-5 py-2.5 rounded-xl border border-dark-border text-text-secondary hover:text-text-primary hover:bg-bg-pill text-sm font-semibold transition-all cursor-pointer"
             >
               Back
             </button>
@@ -239,7 +239,7 @@ export default function OnboardingForm() {
           {step < 3 ? (
             <button
               onClick={handleNextStep}
-              className="flex items-center space-x-1 px-5 py-2.5 rounded-xl bg-white text-black hover:bg-gray-200 text-sm font-bold transition-all cursor-pointer"
+              className="flex items-center space-x-1 px-5 py-2.5 rounded-xl bg-text-primary text-dark-bg hover:opacity-90 text-sm font-bold transition-all cursor-pointer"
             >
               <span>Next</span>
               <ChevronRight className="h-4 w-4" />

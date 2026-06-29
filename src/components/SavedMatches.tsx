@@ -41,10 +41,6 @@ export default function SavedMatches() {
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
   const [toastId, setToastId] = useState(0);
 
-  useEffect(() => {
-    fetchMatches();
-  }, [search, selectedLanguage]);
-
   async function fetchMatches() {
     try {
       const q = new URLSearchParams();
@@ -84,6 +80,10 @@ export default function SavedMatches() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    fetchMatches();
+  }, [search, selectedLanguage]);
 
   const triggerXpToast = (xpGained: number) => {
     const id = toastId;
