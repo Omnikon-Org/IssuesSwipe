@@ -10,6 +10,17 @@ export async function getSessionUser() {
     return null;
   }
 
+  if (process.env.NEXT_PUBLIC_DEV_MODE === 'true' && sessionCookie.startsWith('mock_dev_')) {
+    try {
+      const user = await db.user.findFirst({
+        where: { githubId: 'mock_dev_github_user_12345' },
+      });
+      return user;
+    } catch {
+      return null;
+    }
+  }
+
   try {
     let decodedClaims;
     if (process.env.NEXT_PUBLIC_DEV_MODE === 'true' && sessionCookie === 'mock_dev_session_cookie_12345') {
@@ -38,6 +49,10 @@ export async function getAdminStatus() {
 
   if (!sessionCookie) {
     return false;
+  }
+
+  if (process.env.NEXT_PUBLIC_DEV_MODE === 'true' && sessionCookie.startsWith('mock_dev_')) {
+    return true; // Mock developer is admin in dev mode
   }
 
   try {
