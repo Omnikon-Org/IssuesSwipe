@@ -461,15 +461,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
             <div className="grid grid-cols-3 border-t border-dark-border/60 pt-3 text-center gap-1">
               <div>
-                <p className="text-sm font-black text-brand-purple">95%</p>
+                <p className="text-sm font-black text-brand-purple">{user.matchScorePercentage ?? 100}%</p>
                 <p className="text-[9px] text-text-tertiary uppercase font-bold">Match Score</p>
               </div>
               <div className="border-x border-dark-border/60">
-                <p className="text-sm font-black text-brand-purple">Top 12%</p>
+                <p className="text-sm font-black text-brand-purple">Top {user.rankPercentile ?? 100}%</p>
                 <p className="text-[9px] text-text-tertiary uppercase font-bold">Rank</p>
               </div>
               <div>
-                <p className="text-sm font-black text-brand-purple">{recentMatches.length || 23}</p>
+                <p className="text-sm font-black text-brand-purple">{user.totalMatchesCount ?? 0}</p>
                 <p className="text-[9px] text-text-tertiary uppercase font-bold">Matches</p>
               </div>
             </div>

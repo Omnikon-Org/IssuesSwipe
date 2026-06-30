@@ -56,7 +56,28 @@ export async function GET() {
       }
 
       const isAdmin = await getAdminStatus();
-      return NextResponse.json({ authenticated: true, user: { ...finalUser, isAdmin } });
+      
+      // Calculate real gamification metrics
+      const totalSwipes = await db.swipe.count({ where: { userId: user.id } });
+      const totalMatchesCount = await db.savedMatch.count({ where: { userId: user.id } });
+      const matchScorePercentage = totalSwipes > 0 ? Math.round((totalMatchesCount / totalSwipes) * 100) : 100;
+      
+      const totalUsers = await db.user.count();
+      const usersWithMoreXp = await db.user.count({
+        where: { xp: { gt: finalUser.xp } },
+      });
+      const rankPercentile = totalUsers > 0 ? Math.max(1, Math.ceil(((usersWithMoreXp + 1) / totalUsers) * 100)) : 1;
+
+      return NextResponse.json({ 
+        authenticated: true, 
+        user: { 
+          ...finalUser, 
+          isAdmin,
+          totalMatchesCount,
+          matchScorePercentage,
+          rankPercentile
+        } 
+      });
     }
     return NextResponse.json({ authenticated: false, user: null });
   } catch (error) {
