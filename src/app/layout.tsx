@@ -22,6 +22,12 @@ export const metadata: Metadata = {
     description: "Find your next pull request in seconds. Discover open-source issues through a swipe-based interface, grow your streak, gain XP, and contribute to top repositories.",
     type: "website",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "IssueSwipe",
+  },
 };
 
 export default function RootLayout({
