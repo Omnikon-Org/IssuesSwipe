@@ -38,45 +38,70 @@ export default function GlobalExplorer({ user }: { user: any }) {
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
   const [goodFirstIssueOnly, setGoodFirstIssueOnly] = useState(false);
 
+  // Debounce search query
   useEffect(() => {
-    fetchIssues();
-  }, [selectedLanguage, selectedDifficulty, goodFirstIssueOnly]);
+    const timeoutId = setTimeout(() => {
+      fetchIssues();
+    }, 600);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, selectedLanguage, selectedDifficulty, goodFirstIssueOnly]);
 
   const fetchIssues = async () => {
     setLoading(true);
     try {
-      const q = new URLSearchParams();
-      if (selectedLanguage !== 'All') q.append('language', selectedLanguage);
-      if (selectedDifficulty !== 'All') q.append('difficulty', selectedDifficulty);
-      if (goodFirstIssueOnly) q.append('gfi', 'true');
+      const parts = ['type:issue', 'state:open'];
+      if (searchQuery) parts.push(searchQuery);
+      if (selectedLanguage !== 'All') parts.push(`language:${selectedLanguage}`);
+      if (goodFirstIssueOnly) parts.push('label:"good first issue"');
+      
+      const query = parts.join(' ');
+      const url = `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&sort=created&order=desc&per_page=30`;
 
-      const res = await fetch(`/api/issues/feed?${q.toString()}`);
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      });
+      
       if (res.ok) {
-        const data: Issue[] = await res.json();
-        // Fallback createdAt if missing
-        const issuesWithDates = data.map(i => ({
-            ...i, 
-            createdAt: (i as any).createdAt || new Date().toISOString()
-        }));
-        setIssues(issuesWithDates);
+        const data = await res.json();
+        const mappedIssues = (data.items || [])
+          .filter((item: any) => !item.pull_request)
+          .map((item: any) => {
+            const repoParts = item.repository_url.split('/');
+            const repoName = repoParts.pop() || 'Unknown';
+            const repoOwner = repoParts.pop() || 'Unknown';
+            
+            return {
+              id: item.id.toString(), // Using Github ID
+              githubId: item.id.toString(),
+              title: item.title,
+              description: item.body,
+              url: item.html_url,
+              number: item.number,
+              difficulty: 'unknown',
+              estimatedTime: 'unknown',
+              labels: item.labels?.map((l: any) => l.name) || [],
+              matchScore: 0,
+              createdAt: item.created_at,
+              repository: {
+                id: item.repository_url,
+                name: repoName,
+                owner: repoOwner,
+                url: `https://github.com/${repoOwner}/${repoName}`,
+                stars: 0, // Github search doesn't return repo stars directly
+                language: selectedLanguage !== 'All' ? selectedLanguage : null,
+              }
+            };
+        });
+        setIssues(mappedIssues);
       }
     } catch (error) {
-      console.error('Failed to fetch issues', error);
+      console.error('Failed to fetch issues from GitHub', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredIssues = issues.filter(issue => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      issue.title.toLowerCase().includes(q) ||
-      (issue.description && issue.description.toLowerCase().includes(q)) ||
-      issue.repository.name.toLowerCase().includes(q) ||
-      issue.repository.owner.toLowerCase().includes(q)
-    );
-  });
+  const filteredIssues = issues; // API handles filtering natively
 
   const handleSwipeTransition = (issueId: string) => {
     // Navigate to swipe page and pass the issueId to prioritize it
@@ -274,10 +299,6 @@ export default function GlobalExplorer({ user }: { user: any }) {
                       <div className="flex items-center space-x-1">
                         <span className={`h-2 w-2 rounded-full ${getLanguageColor(issue.repository.language)}`} />
                         <span>{issue.repository.language || 'Unknown'}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-3 w-3" />
-                        <span>{(issue.repository.stars / 1000).toFixed(1)}k</span>
                       </div>
                     </div>
                     <div className="flex items-center space-x-1">
