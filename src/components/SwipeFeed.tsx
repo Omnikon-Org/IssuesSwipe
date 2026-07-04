@@ -59,6 +59,7 @@ export default function SwipeFeed() {
   const [goodFirstIssueOnly, setGoodFirstIssueOnly] = useState(true);
   const [selectedStars, setSelectedStars] = useState('All');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [priorityIssueId, setPriorityIssueId] = useState<string | null>(null);
 
   // For future use: min/max stars filter (not yet implemented in UI)
   const [minStars, setMinStars] = useState<string>('');
@@ -84,6 +85,7 @@ export default function SwipeFeed() {
       const urlStars = params.get('stars');
       const urlTags = params.get('tags');
       const urlGfi = params.get('gfi');
+      const urlIssueId = params.get('issueId');
 
       if (urlLang) setSelectedLanguage(urlLang);
       if (urlDiff) setSelectedDifficulty(urlDiff);
@@ -91,6 +93,7 @@ export default function SwipeFeed() {
       if (urlStars) setSelectedStars(urlStars);
       if (urlTags) setSelectedTags(urlTags.split(',').filter(Boolean));
       if (urlGfi) setGoodFirstIssueOnly(urlGfi === 'true');
+      if (urlIssueId) setPriorityIssueId(urlIssueId);
     }
   }, []);
 
@@ -104,12 +107,13 @@ export default function SwipeFeed() {
       if (selectedStars !== 'All') params.set('stars', selectedStars);
       if (selectedTags.length > 0) params.set('tags', selectedTags.join(','));
       if (goodFirstIssueOnly) params.set('gfi', 'true');
+      if (priorityIssueId) params.set('issueId', priorityIssueId);
 
       const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
     fetchFeed();
-  }, [selectedLanguage, selectedDifficulty, minMatchScore, selectedStars, selectedTags, goodFirstIssueOnly]);
+  }, [selectedLanguage, selectedDifficulty, minMatchScore, selectedStars, selectedTags, goodFirstIssueOnly, priorityIssueId]);
 
   async function fetchFeed() {
     setLoading(true);
@@ -119,6 +123,7 @@ export default function SwipeFeed() {
       if (selectedDifficulty !== 'All') q.append('difficulty', selectedDifficulty);
       if (selectedStars !== 'All') q.append('stars', selectedStars);
       if (selectedTags.length > 0) q.append('tags', selectedTags.join(','));
+      if (priorityIssueId) q.append('issueId', priorityIssueId);
 
       const res = await fetch(`/api/issues/feed?${q.toString()}`);
       if (res.ok) {

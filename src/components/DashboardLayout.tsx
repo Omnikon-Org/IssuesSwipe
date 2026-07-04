@@ -8,7 +8,7 @@ import { auth } from '@/lib/firebase/client';
 import { 
   Compass, Heart, FileText, Bookmark, GitBranch, User as UserIcon, Settings, 
   Plus, Target, Flame, GitMerge, Database, Sun, Moon, ChevronDown, Bell, Search,
-  Award, Sparkles, Lock
+  Award, Sparkles, Lock, Globe
 } from 'lucide-react';
 import SearchModal from './SearchModal';
 
@@ -140,6 +140,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Discover', href: '/swipe', icon: Compass },
     { name: 'Matches', href: '/matches', icon: Heart },
     { name: 'Profile', href: '/profile', icon: UserIcon },
+    { type: 'divider', id: 'div-1' },
+    { type: 'section', name: 'Explore' },
+    { name: 'Global Explorer', href: '/explore', icon: Globe },
+    { type: 'divider', id: 'div-2' },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
@@ -168,7 +172,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Navigation Menu */}
           <nav className="space-y-1">
-            {navLinks.map((link) => {
+            {navLinks.map((link: any, index) => {
+              if (link.type === 'divider') {
+                return <div key={link.id || index} className="my-2 border-t border-dark-border/60" />;
+              }
+              if (link.type === 'section') {
+                return (
+                  <h3 key={link.name} className="px-3 pt-2 pb-1 text-[10px] font-black text-text-tertiary uppercase tracking-wider">
+                    {link.name}
+                  </h3>
+                );
+              }
+
               const Icon = link.icon;
               const isActive = pathname === link.href;
               return (
@@ -537,43 +552,56 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
 
-          {/* Activity Feed card */}
-          <div className="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Activity Feed</h3>
-              <Link href="/profile" className="text-xs font-bold text-brand-purple hover:underline">View all</Link>
-            </div>
+          {/* Conditional Feed based on Route */}
+          {pathname === '/explore' ? (
+            <div className="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Saved Issues</h3>
+                <Link href="/matches" className="text-xs font-bold text-brand-purple hover:underline">View all</Link>
+              </div>
 
-            <div className="space-y-3">
-              {recentMatches.length > 0 ? (
-                recentMatches.slice(0, 4).map((match: any) => (
-                  <div key={`${match.savedId}-activity`} className="flex items-start space-x-2.5 text-xs text-text-secondary leading-snug">
-                    <div className={`p-1 rounded mt-0.5 ${
-                      match.status === 'pr_opened' ? 'bg-brand-purple/10 text-brand-purple' :
-                      match.status === 'pr_merged' ? 'bg-brand-green/10 text-brand-green' :
-                      'bg-orange-500/10 text-orange-500'
-                    }`}>
-                      {match.status === 'pr_opened' ? <GitBranch className="h-3 w-3" /> :
-                       match.status === 'pr_merged' ? <GitMerge className="h-3 w-3" /> :
-                       <svg className="h-3 w-3 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                      }
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate">
-                        {match.status === 'pr_opened' ? 'You submitted a PR to ' :
-                         match.status === 'pr_merged' ? 'Your PR was merged in ' :
-                         'You saved an issue in '}
-                        <span className="font-bold text-text-primary">{match.issue.repository.owner}/{match.issue.repository.name}</span>
-                      </p>
-                      <p className="text-[10px] text-text-tertiary mt-0.5">{new Date(match.savedAt).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-text-tertiary italic text-center py-4">No recent activity found. Start swiping!</p>
-              )}
+              <div className="space-y-3">
+                <p className="text-xs text-text-tertiary italic py-2">Saved issues will appear here when you save them from the Global Explorer.</p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Activity Feed</h3>
+                <Link href="/profile" className="text-xs font-bold text-brand-purple hover:underline">View all</Link>
+              </div>
+
+              <div className="space-y-3">
+                {recentMatches.length > 0 ? (
+                  recentMatches.slice(0, 4).map((match: any) => (
+                    <div key={`${match.savedId}-activity`} className="flex items-start space-x-2.5 text-xs text-text-secondary leading-snug">
+                      <div className={`p-1 rounded mt-0.5 ${
+                        match.status === 'pr_opened' ? 'bg-brand-purple/10 text-brand-purple' :
+                        match.status === 'pr_merged' ? 'bg-brand-green/10 text-brand-green' :
+                        'bg-orange-500/10 text-orange-500'
+                      }`}>
+                        {match.status === 'pr_opened' ? <GitBranch className="h-3 w-3" /> :
+                         match.status === 'pr_merged' ? <GitMerge className="h-3 w-3" /> :
+                         <svg className="h-3 w-3 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        }
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate">
+                          {match.status === 'pr_opened' ? 'You submitted a PR to ' :
+                           match.status === 'pr_merged' ? 'Your PR was merged in ' :
+                           'You saved an issue in '}
+                          <span className="font-bold text-text-primary">{match.issue.repository.owner}/{match.issue.repository.name}</span>
+                        </p>
+                        <p className="text-[10px] text-text-tertiary mt-0.5">{new Date(match.savedAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-text-tertiary italic text-center py-4">No recent activity found. Start swiping!</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Tip Box */}
           <div className="p-4 rounded-2xl bg-bg-highlight border border-brand-purple/20 text-brand-purple space-y-1">
