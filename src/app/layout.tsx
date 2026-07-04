@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import InstallPrompt from "@/components/InstallPrompt";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +22,12 @@ export const metadata: Metadata = {
     title: "IssueSwipe - Tinder for Open Source Contributions",
     description: "Find your next pull request in seconds. Discover open-source issues through a swipe-based interface, grow your streak, gain XP, and contribute to top repositories.",
     type: "website",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "IssueSwipe",
   },
 };
 
@@ -48,6 +55,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-dark-bg text-foreground antialiased flex flex-col font-sans">
         {children}
+        <InstallPrompt />
       </body>
     </html>
   );

@@ -397,7 +397,7 @@ export default function SwipeFeed() {
       </div>
 
       {/* Header and Subheading Row */}
-      <div className="w-full flex flex-row items-center justify-between mb-6">
+      <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div className="flex flex-col items-start">
           <h2 className="text-xl font-bold text-text-primary">Find open source projects that need you.</h2>
           <p className="text-xs font-semibold text-text-secondary mt-1">Swipe right to contribute ❤️</p>
@@ -511,7 +511,7 @@ export default function SwipeFeed() {
                 initial={{ opacity: 0, scale: 0.96, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.15, ease: 'easeOut' } }}
                 exit={{ opacity: 0, transition: { duration: 0.05 } }}
-                className="absolute inset-0 bg-dark-card rounded-3xl p-6 border border-dark-border flex flex-col justify-between cursor-grab active:cursor-grabbing shadow-lg overflow-hidden"
+                className="absolute inset-0 bg-dark-card rounded-3xl p-4 sm:p-6 border border-dark-border flex flex-col justify-between cursor-grab active:cursor-grabbing shadow-lg overflow-hidden"
               >
                 {/* Swiping overlay stamps */}
                 <motion.div
