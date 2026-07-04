@@ -17,6 +17,7 @@ export async function GET(request: Request) {
   const filterDiff = searchParams.get('difficulty');
   const filterMaxStars = searchParams.get('stars');
   const filterTags = searchParams.get('tags'); // comma-separated list of topics/tags
+  const priorityIssueId = searchParams.get('issueId');
 
   try {
     const maxStars = filterMaxStars ? parseInt(filterMaxStars) : null;
@@ -82,6 +83,29 @@ export async function GET(request: Request) {
 
     // 5. Sort by matchScore descending (highest match first)
     scoredIssues.sort((a, b) => b.matchScore - a.matchScore);
+
+    // 6. If priorityIssueId is provided, move it to the top or fetch it if missing
+    if (priorityIssueId) {
+      const existingIndex = scoredIssues.findIndex(i => i.id === priorityIssueId);
+      if (existingIndex > -1) {
+        const priorityIssue = scoredIssues.splice(existingIndex, 1)[0];
+        scoredIssues.unshift(priorityIssue);
+      } else {
+        const priorityIssueDb = await db.issue.findUnique({
+          where: { id: priorityIssueId },
+          include: { repository: true },
+        });
+        if (priorityIssueDb) {
+          const matchScore = calculateMatchScore(user, priorityIssueDb);
+          const priorityIssueFormatted = {
+            ...priorityIssueDb,
+            labels: JSON.parse(priorityIssueDb.labels || '[]'),
+            matchScore,
+          };
+          scoredIssues.unshift(priorityIssueFormatted);
+        }
+      }
+    }
 
     return NextResponse.json(scoredIssues);
   } catch (error: unknown) {
