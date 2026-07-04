@@ -405,17 +405,17 @@ export default function SwipeFeed() {
         <button
           onClick={handleSyncIssues}
           disabled={syncing}
-          className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white text-xs font-bold transition-all shadow-md disabled:opacity-55 cursor-pointer shrink-0"
+          className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white text-sm font-bold transition-all shadow-md disabled:opacity-55 cursor-pointer shrink-0"
           title="Sync new issues from GitHub"
         >
           {syncing ? (
             <>
-              <RefreshCw className="h-4 w-4 animate-spin" />
+              <RefreshCw className="h-5 w-5 animate-spin" />
               <span>Syncing...</span>
             </>
           ) : (
             <>
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="h-5 w-5" />
               <span>Sync</span>
             </>
           )}
