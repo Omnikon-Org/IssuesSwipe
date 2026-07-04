@@ -301,7 +301,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </aside>
 
       {/* 2. Middle Content Column */}
-      <main className="flex-grow flex flex-col min-w-0">
+      <main className="flex-grow flex flex-col min-w-0 pb-16 lg:pb-0">
         
         {/* Top Header Bar */}
         <header className="h-16 border-b border-dark-border bg-dark-card/85 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
@@ -623,6 +623,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </aside>
       )}
+
+      {/* Bottom Navigation for Mobile */}
+      <nav className="lg:hidden fixed bottom-0 w-full bg-dark-card border-t border-dark-border flex justify-around items-center h-16 z-50">
+        {navLinks.filter((l: any) => l.href).map((link: any) => {
+          const Icon = link.icon;
+          const isActive = pathname === link.href;
+          return (
+            <Link
+              key={link.name}
+              href={link.href}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
+                isActive ? 'text-brand-purple' : 'text-text-tertiary hover:text-text-secondary'
+              }`}
+            >
+              <Icon className={`h-5 w-5 ${isActive ? 'stroke-[2.5px]' : ''}`} />
+              <span className="text-[9px] font-bold tracking-tight">{link.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
 
       <SearchModal />
     </div>
