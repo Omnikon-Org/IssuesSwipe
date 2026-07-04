@@ -304,34 +304,34 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <main className="flex-grow flex flex-col min-w-0 pb-16 lg:pb-0">
         
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-dark-border bg-dark-card/85 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
+        <header className="h-16 border-b border-dark-border bg-dark-card/85 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between sticky top-0 z-40 gap-2 sm:gap-4">
           {/* Mobile hamburger placeholder or spacer */}
-          <div className="flex items-center space-x-2 lg:hidden">
-            <img src="/LogoIssueSwipeLight.png" alt="IssueSwipe Logo" className="h-12 w-12 object-contain" />
-            <span className="font-extrabold text-brand-purple">IssueSwipe</span>
+          <div className="flex items-center space-x-2 lg:hidden shrink-0">
+            <img src="/LogoIssueSwipeLight.png" alt="IssueSwipe Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain" />
+            <span className="font-extrabold text-brand-purple hidden sm:block">IssueSwipe</span>
           </div>
 
           {/* Search bar inputs */}
-          <div className="relative w-80 max-w-xs sm:max-w-sm cursor-text" onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}>
+          <div className="relative flex-1 max-w-[180px] sm:max-w-sm cursor-text" onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}>
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-tertiary" />
             <input
               type="text"
               readOnly
-              placeholder="Search projects, tech, or keywords..."
-              className="w-full pl-9 pr-10 py-1.5 rounded-xl bg-bg-pill text-xs text-text-primary border border-dark-border focus:border-brand-purple outline-none transition-colors cursor-text pointer-events-none"
+              placeholder="Search..."
+              className="w-full pl-9 pr-2 sm:pr-10 py-1.5 rounded-xl bg-bg-pill text-xs text-text-primary border border-dark-border focus:border-brand-purple outline-none transition-colors cursor-text pointer-events-none"
             />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 px-1 py-0.5 rounded bg-dark-card border border-dark-border text-[9px] text-text-tertiary font-bold tracking-tight">
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 px-1 py-0.5 rounded bg-dark-card border border-dark-border text-[9px] text-text-tertiary font-bold tracking-tight hidden sm:inline-block">
               ⌘ K
             </span>
           </div>
 
             {user && (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1 sm:space-x-4 shrink-0">
                 {/* Notification Bell */}
                 <div className="relative">
                   <button 
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative p-2 rounded-xl text-text-secondary hover:text-brand-purple hover:bg-bg-pill transition-all cursor-pointer"
+                    className="relative p-1.5 sm:p-2 rounded-xl text-text-secondary hover:text-brand-purple hover:bg-bg-pill transition-all cursor-pointer"
                   >
                     <Bell className="h-4.5 w-4.5" />
                     {notifications.some(n => !n.isRead) && (
@@ -382,10 +382,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <img
                         src={user.avatar}
                         alt={user.username}
-                        className="h-8 w-8 rounded-full border border-dark-border"
+                        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-dark-border shrink-0"
                       />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-brand-purple/10 text-brand-purple flex items-center justify-center font-bold text-xs">
+                      <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-brand-purple/10 text-brand-purple flex items-center justify-center font-bold text-xs shrink-0">
                         {user.username[0]?.toUpperCase()}
                       </div>
                     )}
