@@ -288,11 +288,29 @@ export default function GlobalExplorer({ user }: { user: any }) {
     [sortParam, getHeaders, buildSearchQuery],
   );
 
-  // Debounce search on filter changes
+  // Keep a ref to the latest fetchIssuesList to avoid stale closures in debounce
+  const fetchRef = useRef(fetchIssuesList);
+  fetchRef.current = fetchIssuesList;
+
+  // ─── Fetch orchestration effects ────────────────────────────────────
+
+  // Initial fetch on mount
   useEffect(() => {
-    const timeoutId = setTimeout(() => fetchIssuesList(), 500);
+    fetchIssuesList();
+    // Run only once on mount — intentionally omitting deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounced search (500ms): only searchInput triggers debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => fetchRef.current(), 500);
     return () => clearTimeout(timeoutId);
-  }, [sortParam, activeLabels, excludedLabels, activeLanguages, unassignedFilter, noCommentsFilter, fetchIssuesList, searchInput]);
+  }, [searchInput]);
+
+  // Immediate: filter / sort changes fire without debounce
+  useEffect(() => {
+    fetchIssuesList();
+  }, [sortParam, activeLabels, excludedLabels, activeLanguages, unassignedFilter, noCommentsFilter]);
 
   // ─── Filter handlers ────────────────────────────────────────────────
 
