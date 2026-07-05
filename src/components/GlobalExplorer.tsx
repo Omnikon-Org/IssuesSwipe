@@ -133,7 +133,8 @@ const formatDate = (dateString: string) => {
   }).format(new Date(dateString));
 };
 
-const extractRepoFromUrl = (repoUrl: string) => {
+const extractRepoFromUrl = (repoUrl: string | null | undefined) => {
+  if (!repoUrl) return 'unknown/repo';
   return repoUrl.replace('https://api.github.com/repos/', '');
 };
 
