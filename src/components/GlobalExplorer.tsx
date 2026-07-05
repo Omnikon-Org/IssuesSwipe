@@ -271,8 +271,9 @@ export default function GlobalExplorer({ user }: { user: any }) {
 
         const data = await res.json();
         setPagination(parseLinkHeader(res.headers.get('link')));
-        setTotalCount(data.total_count);
-        const onlyIssues = data.items.filter(
+        setTotalCount(data?.total_count ?? 0);
+        const items = data?.items ?? [];
+        const onlyIssues = items.filter(
           (item: GitHubIssue) => !item.pull_request,
         );
 
