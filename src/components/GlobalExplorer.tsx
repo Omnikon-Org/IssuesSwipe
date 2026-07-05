@@ -1103,13 +1103,13 @@ export default function GlobalExplorer({ user }: { user: any }) {
                                   {score}% match
                                 </div>
 
-                                {/* Swipe to review */}
+                                {/* Swipe more issues */}
                                 <button
                                   onClick={() => router.push(`/swipe?issueId=${item.id}`)}
                                   className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-purple text-white hover:opacity-90 transition-all active:scale-95"
                                 >
                                   <Sparkles className="w-3 h-3" />
-                                  Swipe to review
+                                  Swipe more issues
                                 </button>
                               </div>
                             </div>
