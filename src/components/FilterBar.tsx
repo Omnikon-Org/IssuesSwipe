@@ -13,19 +13,14 @@ interface FilterBarProps {
   setMinMatchScore: (score: string) => void;
   goodFirstIssueOnly: boolean;
   setGoodFirstIssueOnly: (val: boolean) => void;
-  selectedStars: string;
-  setSelectedStars: (stars: string) => void;
+  minStars: string;
+  setMinStars: (val: string) => void;
+  maxStars: string;
+  setMaxStars: (val: string) => void;
+  onCommitStars: () => void;
   selectedTags: string[];
   setSelectedTags: (tags: string[]) => void;
 }
-
-const STAR_OPTIONS = [
-  { label: 'All Stars', value: 'All' },
-  { label: '< 100 Stars', value: '100' },
-  { label: '< 1000 Stars', value: '1000' },
-  { label: '< 5000 Stars', value: '5000' },
-  { label: '< 10000 Stars', value: '10000' },
-];
 
 const PRESET_TAGS = [
   'hacktoberfest',
@@ -50,8 +45,11 @@ export default function FilterBar({
   setMinMatchScore,
   goodFirstIssueOnly,
   setGoodFirstIssueOnly,
-  selectedStars,
-  setSelectedStars,
+  minStars,
+  setMinStars,
+  maxStars,
+  setMaxStars,
+  onCommitStars,
   selectedTags,
   setSelectedTags,
 }: FilterBarProps) {
@@ -59,7 +57,6 @@ export default function FilterBar({
   const [langOpen, setLangOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
   const [scoreOpen, setScoreOpen] = useState(false);
-  const [starsOpen, setStarsOpen] = useState(false);
   const [tagInputOpen, setTagInputOpen] = useState(false);
 
   // Tag Search States
@@ -83,7 +80,8 @@ export default function FilterBar({
     selectedDifficulty !== 'All',
     minMatchScore !== 'All',
     goodFirstIssueOnly,
-    selectedStars !== 'All',
+    minStars !== '',
+    maxStars !== '',
     selectedTags.length > 0,
   ].filter(Boolean).length;
 
@@ -92,8 +90,10 @@ export default function FilterBar({
     setSelectedDifficulty('All');
     setMinMatchScore('All');
     setGoodFirstIssueOnly(false);
-    setSelectedStars('All');
+    setMinStars('');
+    setMaxStars('');
     setSelectedTags([]);
+    onCommitStars();
   };
 
   const handleAddTag = (tag: string) => {
@@ -120,7 +120,7 @@ export default function FilterBar({
         {/* Match Score Dropdown */}
         <div className="relative">
           <button
-            onClick={() => { setScoreOpen(!scoreOpen); setLangOpen(false); setDiffOpen(false); setStarsOpen(false); }}
+            onClick={() => { setScoreOpen(!scoreOpen); setLangOpen(false); setDiffOpen(false); }}
             className="px-3 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer transition-all"
           >
             <span>Match: {minMatchScore === 'All' ? 'All' : `>${minMatchScore}%`}</span>
@@ -151,7 +151,7 @@ export default function FilterBar({
         {/* Language Dropdown */}
         <div className="relative">
           <button
-            onClick={() => { setLangOpen(!langOpen); setScoreOpen(false); setDiffOpen(false); setStarsOpen(false); }}
+            onClick={() => { setLangOpen(!langOpen); setScoreOpen(false); setDiffOpen(false); }}
             className="px-3 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer transition-all"
           >
             <span>Lang: {selectedLanguage}</span>
@@ -182,7 +182,7 @@ export default function FilterBar({
         {/* Difficulty Dropdown */}
         <div className="relative">
           <button
-            onClick={() => { setDiffOpen(!diffOpen); setLangOpen(false); setScoreOpen(false); setStarsOpen(false); }}
+            onClick={() => { setDiffOpen(!diffOpen); setLangOpen(false); setScoreOpen(false); }}
             className="px-3 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer transition-all"
           >
             <span>Diff: {selectedDifficulty}</span>
@@ -210,36 +210,28 @@ export default function FilterBar({
           </AnimatePresence>
         </div>
 
-        {/* Star Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => { setStarsOpen(!starsOpen); setLangOpen(false); setDiffOpen(false); setScoreOpen(false); }}
-            className="px-3 py-1.5 rounded-xl bg-dark-card border border-dark-border text-xs font-bold text-text-secondary hover:text-brand-purple flex items-center space-x-1 cursor-pointer transition-all"
-          >
-            <Star className="h-3.5 w-3.5 text-yellow-500 mr-0.5" />
-            <span>Stars: {selectedStars === 'All' ? 'All' : `< ${selectedStars}`}</span>
-            <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-          </button>
-          <AnimatePresence>
-            {starsOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                className="absolute top-9 left-0 w-36 bg-dark-card border border-dark-border rounded-xl shadow-lg p-1.5 space-y-0.5"
-              >
-                {STAR_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => { setSelectedStars(opt.value); setStarsOpen(false); }}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-bg-pill text-xs font-semibold text-text-secondary hover:text-brand-purple"
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Star Range Inputs */}
+        <div className="flex items-center gap-1.5">
+          <Star className="h-3.5 w-3.5 text-yellow-500 shrink-0" />
+          <input
+            type="number"
+            min={0}
+            placeholder="Min ★"
+            value={minStars}
+            onChange={(e) => setMinStars(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && onCommitStars()}
+            className="w-20 rounded-xl border border-dark-border bg-dark-card px-2 py-1.5 text-xs font-bold text-text-secondary placeholder-text-tertiary focus:outline-none focus:border-brand-purple"
+          />
+          <span className="text-text-tertiary text-xs">–</span>
+          <input
+            type="number"
+            min={0}
+            placeholder="Max ★"
+            value={maxStars}
+            onChange={(e) => setMaxStars(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && onCommitStars()}
+            className="w-20 rounded-xl border border-dark-border bg-dark-card px-2 py-1.5 text-xs font-bold text-text-secondary placeholder-text-tertiary focus:outline-none focus:border-brand-purple"
+          />
         </div>
 
         {/* Good First Issue Switch Toggle */}
