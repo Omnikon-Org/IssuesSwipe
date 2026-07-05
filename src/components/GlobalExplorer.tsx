@@ -180,10 +180,14 @@ export default function GlobalExplorer({ user }: { user: any }) {
 
   // Load PAT on mount
   useEffect(() => {
-    const savedPat = localStorage.getItem('githubPat');
-    if (savedPat) {
-      setPat(savedPat);
-      setPatInput(savedPat);
+    try {
+      const savedPat = localStorage.getItem('githubPat');
+      if (savedPat) {
+        setPat(savedPat);
+        setPatInput(savedPat);
+      }
+    } catch {
+      // localStorage unavailable (SSR, restricted mode, etc.) — skip PAT restore
     }
   }, []);
 
@@ -380,7 +384,11 @@ export default function GlobalExplorer({ user }: { user: any }) {
   // ─── Save PAT ───────────────────────────────────────────────────────
 
   const savePat = () => {
-    localStorage.setItem('githubPat', patInput);
+    try {
+      localStorage.setItem('githubPat', patInput);
+    } catch {
+      // localStorage unavailable — PAT only persists for this session
+    }
     setPat(patInput);
     setShowSettings(false);
   };
