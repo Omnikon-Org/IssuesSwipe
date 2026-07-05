@@ -15,12 +15,14 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const filterLang = searchParams.get('language');
   const filterDiff = searchParams.get('difficulty');
-  const filterMaxStars = searchParams.get('stars');
+  const filterMinStarsParam = searchParams.get('minStars');
+  const filterMaxStarsParam = searchParams.get('maxStars');
   const filterTags = searchParams.get('tags'); // comma-separated list of topics/tags
   const priorityIssueId = searchParams.get('issueId');
 
   try {
-    const maxStars = filterMaxStars ? parseInt(filterMaxStars) : null;
+    const maxStars = filterMaxStarsParam ? parseInt(filterMaxStarsParam) : null;
+    const minStars = filterMinStarsParam ? parseInt(filterMinStarsParam) : null;
     const requestedTags = filterTags ? filterTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : [];
 
     // 1. Fetch issues the user hasn't swiped on yet
@@ -33,11 +35,12 @@ export async function GET(request: Request) {
         },
         // Apply optional database filters
         ...(filterDiff ? { difficulty: filterDiff } : {}),
-        ...(maxStars !== null
+        ...(maxStars !== null || minStars !== null
           ? {
               repository: {
                 stars: {
-                  lte: maxStars,
+                  ...(maxStars !== null ? { lte: maxStars } : {}),
+                  ...(minStars !== null ? { gte: minStars } : {}),
                 },
               },
             }

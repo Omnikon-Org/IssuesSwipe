@@ -57,11 +57,11 @@ export default function SwipeFeed() {
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
   const [minMatchScore, setMinMatchScore] = useState('All');
   const [goodFirstIssueOnly, setGoodFirstIssueOnly] = useState(true);
-  const [selectedStars, setSelectedStars] = useState('All');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [priorityIssueId, setPriorityIssueId] = useState<string | null>(null);
-
-  // For future use: min/max stars filter (not yet implemented in UI)
+  // Draft values update on every keystroke; committed values only update on Enter and trigger refetch
+  const [minStarsDraft, setMinStarsDraft] = useState<string>('');
+  const [maxStarsDraft, setMaxStarsDraft] = useState<string>('');
   const [minStars, setMinStars] = useState<string>('');
   const [maxStars, setMaxStars] = useState<string>('');
 
@@ -82,7 +82,8 @@ export default function SwipeFeed() {
       const urlLang = params.get('language');
       const urlDiff = params.get('difficulty');
       const urlScore = params.get('score');
-      const urlStars = params.get('stars');
+      const urlMinStars = params.get('minStars');
+      const urlMaxStars = params.get('maxStars');
       const urlTags = params.get('tags');
       const urlGfi = params.get('gfi');
       const urlIssueId = params.get('issueId');
@@ -90,21 +91,23 @@ export default function SwipeFeed() {
       if (urlLang) setSelectedLanguage(urlLang);
       if (urlDiff) setSelectedDifficulty(urlDiff);
       if (urlScore) setMinMatchScore(urlScore);
-      if (urlStars) setSelectedStars(urlStars);
+      if (urlMinStars) setMinStars(urlMinStars);
+      if (urlMaxStars) setMaxStars(urlMaxStars);
       if (urlTags) setSelectedTags(urlTags.split(',').filter(Boolean));
       if (urlGfi) setGoodFirstIssueOnly(urlGfi === 'true');
       if (urlIssueId) setPriorityIssueId(urlIssueId);
     }
   }, []);
 
-  // Update URL params when filter states change
+  // Update URL params and refetch when filters change
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams();
       if (selectedLanguage !== 'All') params.set('language', selectedLanguage);
       if (selectedDifficulty !== 'All') params.set('difficulty', selectedDifficulty);
       if (minMatchScore !== 'All') params.set('score', minMatchScore);
-      if (selectedStars !== 'All') params.set('stars', selectedStars);
+      if (minStars !== '') params.set('minStars', minStars);
+      if (maxStars !== '') params.set('maxStars', maxStars);
       if (selectedTags.length > 0) params.set('tags', selectedTags.join(','));
       if (goodFirstIssueOnly) params.set('gfi', 'true');
       if (priorityIssueId) params.set('issueId', priorityIssueId);
@@ -113,7 +116,7 @@ export default function SwipeFeed() {
       window.history.replaceState({}, '', newUrl);
     }
     fetchFeed();
-  }, [selectedLanguage, selectedDifficulty, minMatchScore, selectedStars, selectedTags, goodFirstIssueOnly, priorityIssueId]);
+  }, [selectedLanguage, selectedDifficulty, minMatchScore, minStars, maxStars, selectedTags, goodFirstIssueOnly, priorityIssueId]); // minStars/maxStars only change on Enter
 
   async function fetchFeed() {
     setLoading(true);
@@ -121,7 +124,8 @@ export default function SwipeFeed() {
       const q = new URLSearchParams();
       if (selectedLanguage !== 'All') q.append('language', selectedLanguage);
       if (selectedDifficulty !== 'All') q.append('difficulty', selectedDifficulty);
-      if (selectedStars !== 'All') q.append('stars', selectedStars);
+      if (minStars !== '') q.append('minStars', minStars);
+      if (maxStars !== '') q.append('maxStars', maxStars);
       if (selectedTags.length > 0) q.append('tags', selectedTags.join(','));
       if (priorityIssueId) q.append('issueId', priorityIssueId);
 
@@ -331,6 +335,12 @@ export default function SwipeFeed() {
     }
   };
 
+  const formatStars = (n: number) => {
+    if (n < 1000) return String(n);
+    if (n < 1000000) return `${(n / 1000).toFixed(1)}k`;
+    return `${(n / 1000000).toFixed(1)}m`;
+  };
+
   // Get color code by language
   const getLanguageColor = (lang: string | null) => {
     if (!lang) return 'bg-gray-400';
@@ -432,33 +442,14 @@ export default function SwipeFeed() {
         setMinMatchScore={setMinMatchScore}
         goodFirstIssueOnly={goodFirstIssueOnly}
         setGoodFirstIssueOnly={setGoodFirstIssueOnly}
-        selectedStars={selectedStars}
-        setSelectedStars={setSelectedStars}
+        minStars={minStarsDraft}
+        setMinStars={setMinStarsDraft}
+        maxStars={maxStarsDraft}
+        setMaxStars={setMaxStarsDraft}
+        onCommitStars={() => { setMinStars(minStarsDraft); setMaxStars(maxStarsDraft); }}
         selectedTags={selectedTags}
         setSelectedTags={setSelectedTags}
       />
-
-      {/* Star Range Filter */}
-      <div className="flex items-center gap-2 px-4 py-2 text-sm">
-        <span className="text-gray-400 font-medium">Star Range:</span>
-        <input
-          type="number"
-          min={0}
-          placeholder="Min"
-          value={minStars}
-          onChange={(e) => setMinStars(e.target.value)}
-          className="w-20 rounded-md border border-gray-600 bg-gray-800 px-2 py-1 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-        />
-        <span className="text-gray-400">–</span>
-        <input
-          type="number"
-          min={0}
-          placeholder="Max"
-          value={maxStars}
-          onChange={(e) => setMaxStars(e.target.value)}
-          className="w-20 rounded-md border border-gray-600 bg-gray-800 px-2 py-1 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-        />
-      </div>
 
 
       {/* Empty State */}
@@ -582,7 +573,7 @@ export default function SwipeFeed() {
                   <div className="flex items-center space-x-4 text-[10px] text-text-tertiary border-b border-dark-border/60 pb-3 font-semibold">
                     <div className="flex items-center space-x-1">
                       <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500/20" />
-                      <span>{(activeCard.repository.stars / 1000).toFixed(1)}k</span>
+                      <span>{formatStars(activeCard.repository.stars)}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
