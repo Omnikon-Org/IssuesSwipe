@@ -528,7 +528,7 @@ export default function SwipeFeed() {
                   Nope
                 </motion.div>
 
-                <div className="space-y-4 flex-grow flex flex-col">
+                <div className="space-y-4 flex-grow flex flex-col overflow-hidden">
                   {/* Header: Title and Match Score */}
                   <div className="flex justify-between items-start">
                     <div className="flex items-center space-x-3">
@@ -611,9 +611,9 @@ export default function SwipeFeed() {
                   )}
 
                   {/* Good First Issues Subsection */}
-                  <div className="flex-grow flex flex-col justify-between pt-1">
-                    <div>
-                      <div className="flex justify-between items-center mb-3">
+                  <div className="flex-grow flex flex-col justify-between pt-1 overflow-hidden">
+                    <div className="flex flex-col flex-grow overflow-hidden">
+                      <div className="flex justify-between items-center mb-3 shrink-0">
                         <div className="flex items-center space-x-2">
                           <h4 className="text-xs font-extrabold text-text-primary uppercase tracking-wider">Good First Issues</h4>
                           <span className="px-1.5 py-0.5 rounded-full bg-brand-purple/15 text-brand-purple text-[10px] font-bold">
@@ -676,7 +676,7 @@ export default function SwipeFeed() {
                       </div>
                     </div>
 
-                    <p className="text-[9px] text-text-tertiary pt-2">
+                    <p className="text-[9px] text-text-tertiary pt-2 shrink-0">
                       Updated 2 hours ago
                     </p>
                   </div>
