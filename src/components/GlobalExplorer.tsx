@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, Filter, Star, Clock, MessageSquare, AlertCircle,
+  Search, Filter, MessageSquare, AlertCircle,
   Sparkles, ChevronRight, Bookmark, RefreshCw, Settings,
   ChevronDown, ChevronLeft, Check, X, Tag, Code, TrendingUp,
   User, CircleDot, Sprout, Calendar
@@ -976,7 +976,6 @@ export default function GlobalExplorer({ user }: { user: any }) {
                     {issues.map((item, idx) => {
                       const repoFullName = extractRepoFromUrl(item.repository_url);
                       const score = getMatchScore(item);
-                      const difficulty = computeDifficulty(item.labels);
 
                       return (
                         <motion.li
