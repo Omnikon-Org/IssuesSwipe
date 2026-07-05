@@ -257,7 +257,7 @@ export default function FilterBar({
       {/* Tag Filter Inputs & Badge Section */}
       <div className="flex flex-col space-y-2 relative" ref={tagDropdownRef}>
         <div className="flex flex-wrap items-center gap-2 bg-dark-card border border-dark-border p-2 rounded-2xl min-h-[44px]">
-          <div className="flex items-center space-x-1.5 text-text-tertiary px-1.5">
+          <div className="flex items-center space-x-1.5 text-text-tertiary px-1.5 mr-2">
             <Tag className="h-3.5 w-3.5" />
             <span className="text-[10px] font-bold uppercase tracking-wide">Topics:</span>
           </div>
