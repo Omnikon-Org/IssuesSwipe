@@ -16,7 +16,7 @@ Swipe right to contribute, left to skip, or bookmark issues for later — all wh
 [![GSSoC](https://img.shields.io/badge/GSSoC'26-Contributions_Welcome-ff3b3b)](#-contributing)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-ff3b3b.svg)](#-contributing)
 
-[Live Demo](#) · [Report Bug](https://github.com/Demon-Die/issueswipe/issues) · [Request Feature](https://github.com/Demon-Die/issueswipe/issues)
+[Live Demo](#) · [Report Bug](https://github.com/Omnikon/issueswipe/issues) · [Request Feature](https://github.com/Omnikon/issueswipe/issues)
 
 </div>
 
@@ -73,7 +73,7 @@ Swipe right to contribute, left to skip, or bookmark issues for later — all wh
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/Demon-Die/issueswipe.git
+git clone https://github.com/Omnikon/issueswipe.git
 cd issueswipe
 npm install
 ```
@@ -233,11 +233,11 @@ IssueSwipe deploys cleanly to [Vercel](https://vercel.com):
 
 ## 🤝 Contributing
 
-IssueSwipe is built in the open under the **Demon-Die** organization and proudly participates in **GSSoC'26 (GirlScript Summer of Code)**. Contributions of all sizes are welcome!
+IssueSwipe is built in the open under the **Omnikon** organization and proudly participates in **GSSoC'26 (GirlScript Summer of Code)**. Contributions of all sizes are welcome!
 
 ### How to contribute
 
-1. **Find an issue** — check the [Issues tab](https://github.com/Demon-Die/issueswipe/issues) for anything labeled `gssoc26`, `good first issue`, or `help wanted`
+1. **Find an issue** — check the [Issues tab](https://github.com/Omnikon/issueswipe/issues) for anything labeled `gssoc26`, `good first issue`, or `help wanted`
 2. **Get assigned** — comment on the issue asking to be assigned; please wait for a maintainer to assign it to you before starting work
 3. **Fork & branch** — fork the repo and create a feature branch (`feature/short-description`)
 4. **Code** — follow the existing project structure and lint rules (`npm run lint` before committing)
@@ -252,12 +252,12 @@ For larger features or architectural changes, open an issue to discuss before su
 
 ## 📄 License
 
-MIT © [Demon-Die](https://github.com/Demon-Die)
+MIT © [Omnikon](https://github.com/Omnikon-Org)
 
 ---
 
 <div align="center">
 
-Built with 🔥 by the **Demon-Die** team · *Code. Create. Conquer.*
+Built with 🔥 by the **Omnikon** team · *Code. Create. Conquer.*
 
 </div>
