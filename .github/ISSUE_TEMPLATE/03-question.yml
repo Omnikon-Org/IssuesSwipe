@@ -1,0 +1,43 @@
+name: Question
+description: Ask for help using or contributing to IssueSwipe.
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your question. Include what you have already tried so the community can help effectively.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I searched the README, documentation, and existing issues first.
+          required: true
+        - label: I agree to follow this project's Code of Conduct.
+          required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: What would you like to know?
+      description: Ask one clear, specific question.
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempts
+    attributes:
+      label: What have you tried?
+      description: Share relevant documentation, commands, or approaches you have already tried.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Include logs, screenshots, links, or environment details if they would help.
+    validations:
+      required: false
