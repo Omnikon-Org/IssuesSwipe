@@ -296,15 +296,15 @@ export default function GlobalExplorer({ user }: { user: any }) {
 
   // Keep a ref to the latest fetchIssuesList to avoid stale closures in debounce
   const fetchRef = useRef(fetchIssuesList);
-  fetchRef.current = fetchIssuesList;
+  useEffect(() => {
+    fetchRef.current = fetchIssuesList;
+  }, [fetchIssuesList]);
 
   // ─── Fetch orchestration effects ────────────────────────────────────
 
   // Initial fetch on mount
   useEffect(() => {
     fetchIssuesList();
-    // Run only once on mount — intentionally omitting deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Debounced search (500ms): only searchInput triggers debounce
