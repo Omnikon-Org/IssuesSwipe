@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase/client';
+import { getFirebaseAuth } from '@/lib/firebase/client';
 import { GithubAuthProvider, signInWithPopup } from 'firebase/auth';
 
 interface GitHubAuthButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -25,7 +25,7 @@ export default function GitHubAuthButton({ children, className, redirectTo = '/s
         idToken = 'mock_developer_token';
       } else {
         const provider = new GithubAuthProvider();
-        const userCredential = await signInWithPopup(auth, provider);
+        const userCredential = await signInWithPopup(getFirebaseAuth(), provider);
         idToken = await userCredential.user.getIdToken();
       }
 
