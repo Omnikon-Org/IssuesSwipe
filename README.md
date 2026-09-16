@@ -69,6 +69,7 @@ Swipe right to contribute, left to skip, or bookmark issues for later — all wh
 
 - **Node.js** 20+
 - **npm** or **pnpm**
+- **Docker Desktop** (recommended), or an existing **PostgreSQL** 16+ server
 
 ### 1. Clone & Install
 
@@ -84,17 +85,25 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` with your values. For local development, leave `NEXT_PUBLIC_DEV_MODE="true"` and skip the GitHub OAuth setup entirely.
+On Windows PowerShell, use:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+For the included local Docker database, keep the example `DATABASE_URL` unchanged. For local development, leave `NEXT_PUBLIC_DEV_MODE="true"` and skip the GitHub OAuth and Firebase setup entirely.
 
 ### 3. Set Up the Database
 
 ```bash
-# Push schema to SQLite
-npx prisma db push
+# Starts PostgreSQL in an isolated local container.
+docker compose up -d
 
-# Seed with sample repositories, issues, and users
-npx prisma db seed
+# Push the Prisma schema to PostgreSQL.
+npx prisma db push
 ```
+
+The first mock sign-in creates a local developer account. Use **Sync** in the app to load simulated issues when no GitHub token is configured.
 
 ### 4. Start the Dev Server
 
@@ -185,12 +194,13 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 
 | Variable | Description |
 |---|---|
-| `DATABASE_URL` | SQLite connection string (default: `file:./dev.db`) |
+| `DATABASE_URL` | PostgreSQL connection string (the included Docker setup runs on `localhost:5432`) |
 | `GITHUB_CLIENT_ID` | GitHub OAuth App Client ID |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth App Client Secret |
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | For live issue sync (optional, falls back to simulation) |
 | `JWT_SECRET` | Secret key for signing session JWTs |
 | `NEXT_PUBLIC_DEV_MODE` | Set `"true"` to skip OAuth and use a mock dev account |
+| `NEXT_PUBLIC_FIREBASE_*` | Firebase client settings, required only when developer mode is disabled |
 
 ---
 
@@ -212,7 +222,7 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 
 - **Framework**: [Next.js 16](https://nextjs.org) (App Router)
 - **Language**: TypeScript 5
-- **Database**: SQLite via [Prisma 7](https://prisma.io) + `better-sqlite3`
+- **Database**: PostgreSQL via [Prisma 7](https://prisma.io) + `pg`
 - **Animations**: [Framer Motion 12](https://framer.com/motion)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com) (custom dark theme)
 - **Icons**: [Lucide React](https://lucide.dev)
@@ -227,7 +237,7 @@ IssueSwipe deploys cleanly to [Vercel](https://vercel.com):
 1. Push your fork/branch to GitHub
 2. Import the repo into Vercel
 3. Add the environment variables from `.env.example` in the Vercel project settings
-4. For production, swap SQLite for a hosted database (e.g. Turso or PostgreSQL via Prisma) and update `DATABASE_URL` accordingly — `better-sqlite3` is intended for local/dev use
+4. Configure a hosted PostgreSQL database and update `DATABASE_URL` accordingly
 
 ---
 

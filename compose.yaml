@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: issueswipe-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: issueswipe
+      POSTGRES_PASSWORD: issueswipe-local-dev
+      POSTGRES_DB: issueswipe
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - issueswipe-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  issueswipe-postgres-data:
