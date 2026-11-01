@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Omnikon-Org/IssuesSwipe/security/policy
+    about: Please follow the security policy. Do not disclose vulnerability details in a public issue.

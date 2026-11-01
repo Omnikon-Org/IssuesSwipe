@@ -1,0 +1,51 @@
+name: Feature request
+description: Suggest an improvement or a new capability for IssueSwipe.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing an idea. Clear problem statements help us evaluate requests fairly.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I searched existing issues and did not find a duplicate request.
+          required: true
+        - label: I agree to follow this project's Code of Conduct.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What user need, limitation, or frustration does this request address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the experience or behavior you would like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds or other approaches have you considered?
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add mockups, examples, links, or any other useful context.
+    validations:
+      required: false
