@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Flame, GitPullRequest, Award, Shield, Sparkles, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase/client';
+import { getFirebaseAuth } from '@/lib/firebase/client';
 import { GithubAuthProvider, signInWithPopup } from 'firebase/auth';
 
 export default function LandingPage() {
@@ -21,7 +21,7 @@ export default function LandingPage() {
         idToken = 'mock_developer_token';
       } else {
         const provider = new GithubAuthProvider();
-        const result = await signInWithPopup(auth, provider);
+        const result = await signInWithPopup(getFirebaseAuth(), provider);
         idToken = await result.user.getIdToken();
       }
       

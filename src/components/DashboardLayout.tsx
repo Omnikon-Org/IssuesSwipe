@@ -4,7 +4,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import Link from 'next/link';
 import GitHubAuthButton from './GitHubAuthButton';
 import { usePathname, useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase/client';
+import { signOutOfFirebase } from '@/lib/firebase/client';
 import { 
   Compass, Heart, FileText, Bookmark, GitBranch, User as UserIcon, Settings, 
   Plus, Target, Flame, GitMerge, Database, Sun, Moon, ChevronDown, Bell, Search,
@@ -103,7 +103,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await signOutOfFirebase();
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/');
       router.refresh();
